@@ -21,7 +21,6 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
@@ -69,19 +68,73 @@ def get_upcoming_events(api, starting_time, number_of_events):
     
     # Add your methods here.
 
+def get_past_events(api,starting_time,end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+    """
+    Shows past events given the time from today's date if date not specified
+    """
+    if end_time<=starting_time:
+        raise ValueError("End time provided is less than the starting time")
+    events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
+    return events_result.get('items',[])
 
+def get_past_reminders(api,starting_time,end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+    """
+    Shows past reminders given a start date and/if end time specified
+    
+    """
+    # Block of code below adapted from: https://stackoverflow.com/a/48750522/
+    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+        raise ValueError("starting time provided is not of format")
+
+    if len(end_time.split('-')) != 3: # check if the len is 3. 
+        raise ValueError("starting time provided is not of format")
+    
+    reminder_list=[]
+    if end_time<=starting_time:
+        raise ValueError("End time provided is less than the starting time")
+    events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
+    events=events_result.get('items',[])
+    for event in events:
+        if event['reminders'].get("useDefault")==True:
+            reminder_list.append(event["summary"]+","+"Reminder through popup 10 minutes before event starts")
+        else:
+           for i in event["reminders"].get("overrides"):
+                reminder_list.append(event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+
+                " minutes before event starts")
+    return reminder_list
+
+def get_upcoming_reminders(api,starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+    """
+    Shows upcoming reminders from todays date and time if starting date is not specified
+
+    """
+    # Block of code below adapted from: https://stackoverflow.com/a/48750522/
+
+    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+        raise ValueError("starting time provided is not of format")
+
+    reminder_list=[]
+    events_result=api.events().list(calendarId='primary',timeMin=starting_time,singleEvents=True,orderBy='startTime').execute()
+    events=events_result.get('items',[])
+    for event in events:
+        if event['reminders'].get("useDefault")==True:
+            reminder_list.append(event["summary"]+","+"Reminder through popup 10 minutes before event starts")
+        else:
+            for i in event["reminders"].get("overrides"):
+                reminder_list.append(event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+
+                " minutes before event starts")
+    return reminder_list
+    
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-
+    past_time="2019-09-25T09:59:04.501209Z"
     events = get_upcoming_events(api, time_now, 10)
-
     if not events:
         print('No upcoming events found.')
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
         print(start, event['summary'])
-
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     main()
