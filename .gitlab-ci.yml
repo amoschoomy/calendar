@@ -3,4 +3,7 @@ test:
   script:
   - pip install --upgrade pip
   - pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+  - pip install coverage
   - python CalendarTest.py
+  - coverage run -m CalendarTest
+  - coverage report -m

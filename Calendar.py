@@ -65,6 +65,25 @@ def get_upcoming_events(api, starting_time, number_of_events):
                                       maxResults=number_of_events, singleEvents=True,
                                       orderBy='startTime').execute()
     return events_result.get('items', [])
+
+def get_upcoming_events_2(api, starting_time= datetime.datetime.utcnow().isoformat() + 'Z'):
+    """
+    Get all upcoming events
+
+    """
+    results=""
+    # Block of code below adapted from: https://stackoverflow.com/a/48750522/
+    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+        raise ValueError("starting time provided is not of format")
+
+    events_result = api.events().list(calendarId='primary', timeMin=starting_time,
+                                      singleEvents=True,
+                                      orderBy='startTime').execute()
+    result=events_result.get('items', [])
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results+=(start,event['summary'])
+    return results
     
     # Add your methods here.
 
@@ -72,10 +91,20 @@ def get_past_events(api,starting_time,end_time=datetime.datetime.utcnow().isofor
     """
     Shows past events given the time from today's date if date not specified
     """
+    results=""
     if end_time<=starting_time:
         raise ValueError("End time provided is less than the starting time")
+    # Block of code below adapted from: https://stackoverflow.com/a/48750522/
+    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+        raise ValueError("starting time provided is not of format")
+
     events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
-    return events_result.get('items',[])
+    result=events_result.get('items',[])
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results+=(start,event['summary'])
+    return results
+
 
 def get_past_reminders(api,starting_time,end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
@@ -89,19 +118,19 @@ def get_past_reminders(api,starting_time,end_time=datetime.datetime.utcnow().iso
     if len(end_time.split('-')) != 3: # check if the len is 3. 
         raise ValueError("starting time provided is not of format")
     
-    reminder_list=[]
+    reminders=""
     if end_time<=starting_time:
         raise ValueError("End time provided is less than the starting time")
     events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
     events=events_result.get('items',[])
     for event in events:
         if event['reminders'].get("useDefault")==True:
-            reminder_list.append(event["summary"]+","+"Reminder through popup 10 minutes before event starts")
+            reminders+=event["summary"]+","+"Reminder through popup 10 minutes before event starts"
         else:
-           for i in event["reminders"].get("overrides"):
-                reminder_list.append(event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+
-                " minutes before event starts")
-    return reminder_list
+            for i in event["reminders"].get("overrides"):
+                reminders+=event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+" minutes before event starts"
+        reminders+="\n"
+    return reminders
 
 def get_upcoming_reminders(api,starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
@@ -113,18 +142,18 @@ def get_upcoming_reminders(api,starting_time=datetime.datetime.utcnow().isoforma
     if len(starting_time.split('-')) != 3: # check if the len is 3. 
         raise ValueError("starting time provided is not of format")
 
-    reminder_list=[]
+    reminders=""
     events_result=api.events().list(calendarId='primary',timeMin=starting_time,singleEvents=True,orderBy='startTime').execute()
     events=events_result.get('items',[])
     for event in events:
         if event['reminders'].get("useDefault")==True:
-            reminder_list.append(event["summary"]+","+"Reminder through popup 10 minutes before event starts")
+            reminders+=event["summary"]+","+"Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides"):
-                reminder_list.append(event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+
-                " minutes before event starts")
-    return reminder_list
-    
+                reminders+=event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+" minutes before event starts"
+        reminders+="\n"
+    return reminders
+          
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
