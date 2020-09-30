@@ -18,6 +18,7 @@ from __future__ import print_function
 import datetime
 import pickle
 import os.path
+from time import strptime
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -153,7 +154,75 @@ def get_upcoming_reminders(api,starting_time=datetime.datetime.utcnow().isoforma
                 reminders+=event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+" minutes before event starts"
         reminders+="\n"
     return reminders
-          
+
+def navigate_calendar(api,date:datetime.datetime,navigation_type:str):
+    result=""
+    month=str(date.month)
+    year=str(date.year)
+    day=str(date.day)
+
+    if navigation_type=="MONTH":
+        try:
+            dates=datetime.datetime.strptime(year+"-"+month+"-"+"31"+"23:59:59",'%Y-%m-%d %H:%M:%S')
+            result+="EVENTS: \n"
+            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="\n"
+            result+="REMINDERS: \n"
+            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+        except ValueError:
+            dates=datetime.datetime.strptime(year+"-"+month+"-"+"30"+"23:59:59",'%Y-%m-%d %H:%M:%S')
+            result+="EVENTS: \n"
+            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="\n"
+            result+="REMINDERS: \n"
+            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="\n"
+
+    elif navigation_type=="YEAR":
+        try:
+            dates=datetime.datetime.strptime(year+"-"+"12"+"-"+"31"+"23:59:59",'%Y-%m-%d %H:%M:%S')
+            result+="EVENTS: \n"
+            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="\n"
+            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="REMINDERS: \n"
+        except ValueError:
+            dates=datetime.datetime.strptime(year+"-"+"12"+"-"+"30"+"23:59:59",'%Y-%m-%d %H:%M:%S')
+            result+="EVENTS: \n"
+            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="\n"
+            result+="REMINDERS: \n"
+            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            result+="\n"
+
+    elif navigation_type=="DAY":
+        dates=datetime.datetime.strptime(year+"-"+month+"-"+day+"23:59:59",'%Y-%m-%d %H:%M:%S')
+        result+="EVENTS: \n"
+        result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+        result+="\n"
+        result+="REMINDERS: \n"
+        result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+    else:
+        raise ValueError("Navigation type is wrong")
+    return result
+    
+    
+def get_detailed_event(api,query):
+    events_result=api.events().list(calendarId='primary',singleEvents=True,orderBy='startTime',q=query).execute()
+    event=events_result.get("items",[])
+    detailed_description=""
+    detailed_description+="Title: "+event['summary']+"\n"
+    detailed_description+="Visibility:"+event["visibility"]+"\n"
+    detailed_description+="Status: "+event["status"]+"\n"
+    detailed_description+="Start:"+event['start'].get('dateTime', event['start'].get('date'))+"\n"
+    detailed_description+="End:"+event['end'].get('dateTime', event['end'].get('date'))+"\n"
+    detailed_description+="Location"+event["location"]+"\n"
+    for attendees in event["attendees"]:
+        detailed_description+=attendees.email+"\n"
+    return detailed_description
+
+def get_detailed_reminder(api,reminder):
+    event_result=api.events().get()
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time

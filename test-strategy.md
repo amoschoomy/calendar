@@ -15,3 +15,5 @@ We will use the same technique which is branch coverage except now in this metho
 **Strategy for Viewing Upcoming Reminders, Viewing Past Reminders**
 
 This functionalities is done through get_upcoming_reminders method and get_past_reminders, therefore we will test that methods. We will use path coverage for testing this method as this method have a few paths that is possible in the program flow due to nested loops and multiple if statements. This is to ensure that all possibles paths of the program are tested unlike branch coverage/condition coverage.
+
+**Strategy for User Navigation (Feature 3)**
