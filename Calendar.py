@@ -221,8 +221,6 @@ def get_detailed_event(api,query):
         detailed_description+=attendees.email+"\n"
     return detailed_description
 
-def get_detailed_reminder(api,reminder):
-    event_result=api.events().get()
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
