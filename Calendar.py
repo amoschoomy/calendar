@@ -155,7 +155,7 @@ def get_upcoming_reminders(api,starting_time=datetime.datetime.utcnow().isoforma
         reminders+="\n"
     return reminders
 
-def navigate_calendar(api,date:datetime.datetime,navigation_type:str):
+def navigate_calendar(api,date:datetime.datetime,navigation_type):
     result=""
     month=str(date.month)
     year=str(date.year)
