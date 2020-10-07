@@ -83,7 +83,7 @@ def get_upcoming_events_2(api, starting_time= datetime.datetime.utcnow().isoform
     result=events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results+=(start,event['summary'])
+        results+=event['summary']+","+start
     return results
     
     # Add your methods here.
