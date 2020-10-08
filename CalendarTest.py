@@ -445,13 +445,24 @@ class CalendarTestGetPastReminders(unittest.TestCase):
             api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual("\n",reminders) #A new line is returned since the outer for loopm is executed
 
+class CalendarTestNavigateCalendar(unittest.TestCase):
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path1_invalid_date(self,api):
+        #invalid date is given as a parameter
+        #will throw Attribute Error when trying to get the month,day,year attribute
+        date="12 October 2020"
+        with self.assertRaises(AttributeError):
+            Calendar.navigate_calendar(api,date,"MONTH")
+
+
 
 
 
 
 def main():
     # Create the test suite from the cases above.
-    test_classes=[CalendarTest,CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,CalendarTestGetPastReminders,
+    test_classes=[CalendarTest,CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,
+    CalendarTestGetPastReminders,CalendarTestNavigateCalendar,
     CalendarTestGetPastEvents] #Test Classes 
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
