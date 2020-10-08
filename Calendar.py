@@ -125,7 +125,7 @@ def get_past_reminders(api,starting_time,end_time=datetime.datetime.utcnow().iso
         raise ValueError("starting time provided is not of format")
     
     reminders=""
-    if end_time<=starting_time:
+    if end_time<starting_time:
         raise ValueError("End time provided is less than the starting time")
     events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
     events=events_result.get('items',[])

@@ -329,8 +329,8 @@ class CalendarTestGetPastReminders(unittest.TestCase):
     def test_get_past_reminders_path2(self,api):
         #This test for second path where the end time is of wrong format
         #therefore ending execution immediately
-        end_time="2020-10-15T00:00:00.000000Z"
-        start_time="11 October 2020"
+        start_time="2020-10-15T00:00:00.000000Z"
+        end_time="11 October 2020"
         with self.assertRaises(ValueError):
             Calendar.get_past_reminders(api,start_time,end_time)
     
