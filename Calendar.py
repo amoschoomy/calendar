@@ -22,8 +22,9 @@ from time import strptime
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 
 def get_calendar_api():
@@ -67,97 +68,105 @@ def get_upcoming_events(api, starting_time, number_of_events):
                                       orderBy='startTime').execute()
     return events_result.get('items', [])
 
-def get_upcoming_events_2(api, starting_time= datetime.datetime.utcnow().isoformat() + 'Z'):
+
+def get_upcoming_events_2(api, starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Get all upcoming events
 
     """
-    results=""
+    results = ""
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
-    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+    if len(starting_time.split('-')) != 3:  # check if the len is 3.
         raise ValueError("starting time provided is not of format")
 
     events_result = api.events().list(calendarId='primary', timeMin=starting_time,
                                       singleEvents=True,
                                       orderBy='startTime').execute()
-    result=events_result.get('items', [])
+    result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results+=event['summary']+","+start
+        results += event['summary'] + "," + start
     return results
-    
+
     # Add your methods here.
 
-def get_past_events(api,starting_time,end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+
+def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Shows past events given the time from today's date if date not specified
     """
-    results=""
+    results = ""
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
-    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+    if len(starting_time.split('-')) != 3:  # check if the len is 3.
         raise ValueError("starting time provided is not of format")
 
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
-    if len(end_time.split('-')) != 3: # check if the len is 3. 
+    if len(end_time.split('-')) != 3:  # check if the len is 3.
         raise ValueError("starting time provided is not of format")
 
-    if end_time<starting_time:
+    if end_time < starting_time:
         raise ValueError("End time provided is less than the starting time")
 
-    events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
-    result=events_result.get('items',[])
+    events_result = api.events().list(calendarId='primary', timeMin=starting_time, timeMax=end_time, singleEvents=True,
+                                      orderBy='startTime').execute()
+    result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results+=event['summary']+","+start
+        results += event['summary'] + "," + start
     return results
 
 
-def get_past_reminders(api,starting_time,end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Shows past reminders given a start date and/if end time specified
     
     """
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
-    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+    if len(starting_time.split('-')) != 3:  # check if the len is 3.
         raise ValueError("starting time provided is not of format")
 
-    if len(end_time.split('-')) != 3: # check if the len is 3. 
+    if len(end_time.split('-')) != 3:  # check if the len is 3.
         raise ValueError("starting time provided is not of format")
-    
-    reminders=""
-    if end_time<starting_time:
+
+    reminders = ""
+    if end_time < starting_time:
         raise ValueError("End time provided is less than the starting time")
-    events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
-    events=events_result.get('items',[])
+    events_result = api.events().list(calendarId='primary', timeMin=starting_time, timeMax=end_time, singleEvents=True,
+                                      orderBy='startTime').execute()
+    events = events_result.get('items', [])
     for event in events:
-        if event['reminders'].get("useDefault")==True:
-            reminders+=event["summary"]+","+"Reminder through popup 10 minutes before event starts"
+        if event['reminders'].get("useDefault") == True:
+            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
         else:
-            for i in event["reminders"].get("overrides"):
-                reminders+=event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+" minutes before event starts"
-        reminders+="\n"
+            for i in event["reminders"].get("overrides",[]):
+                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                    i.get("minutes")) + " minutes before event starts"
+        reminders += "\n"
     return reminders
 
-def get_upcoming_reminders(api,starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+
+def get_upcoming_reminders(api, starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Shows upcoming reminders from todays date and time if starting date is not specified
 
     """
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
 
-    if len(starting_time.split('-')) != 3: # check if the len is 3. 
+    if len(starting_time.split('-')) != 3:  # check if the len is 3.
         raise ValueError("starting time provided is not of format")
 
-    reminders=""
-    events_result=api.events().list(calendarId='primary',timeMin=starting_time,singleEvents=True,orderBy='startTime').execute()
-    events=events_result.get('items',[])
+    reminders = ""
+    events_result = api.events().list(calendarId='primary', timeMin=starting_time, singleEvents=True,
+                                      orderBy='startTime').execute()
+    events = events_result.get('items', [])
     for event in events:
-        if event['reminders'].get("useDefault")==True:
-            reminders+=event["summary"]+","+"Reminder through popup 10 minutes before event starts"
+        if event['reminders'].get("useDefault") == True:
+            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
         else:
-            for i in event["reminders"].get("overrides"):
-                reminders+=event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+" minutes before event starts"
-        reminders+="\n"
+            for i in event["reminders"].get("overrides",[]):
+                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                    i.get("minutes")) + " minutes before event starts"
+        reminders += "\n"
     return reminders
 
 def navigate_calendar(api,date,navigation_type):
@@ -166,76 +175,126 @@ def navigate_calendar(api,date,navigation_type):
     year=str(date.year)
     day=str(date.day)
 
-    if navigation_type=="MONTH":
+    if navigation_type == "MONTH":
         try:
-            dates=datetime.datetime.strptime(year+"-"+month+"-"+"31"+"23:59:59",'%Y-%m-%d %H:%M:%S')
-            result+="EVENTS: \n"
-            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="\n"
-            result+="REMINDERS: \n"
-            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "31" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            result += "EVENTS: \n"
+            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+            result += "REMINDERS: \n"
+            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
         except ValueError:
-            dates=datetime.datetime.strptime(year+"-"+month+"-"+"30"+"23:59:59",'%Y-%m-%d %H:%M:%S')
-            result+="EVENTS: \n"
-            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="\n"
-            result+="REMINDERS: \n"
-            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="\n"
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "30" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            result += "EVENTS: \n"
+            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+            result += "REMINDERS: \n"
+            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
 
-    elif navigation_type=="YEAR":
+    elif navigation_type == "YEAR":
         try:
-            dates=datetime.datetime.strptime(year+"-"+"12"+"-"+"31"+"23:59:59",'%Y-%m-%d %H:%M:%S')
-            result+="EVENTS: \n"
-            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="\n"
-            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="REMINDERS: \n"
+            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            result += "EVENTS: \n"
+            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "REMINDERS: \n"
         except ValueError:
-            dates=datetime.datetime.strptime(year+"-"+"12"+"-"+"30"+"23:59:59",'%Y-%m-%d %H:%M:%S')
-            result+="EVENTS: \n"
-            result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="\n"
-            result+="REMINDERS: \n"
-            result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-            result+="\n"
+            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "30" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            result += "EVENTS: \n"
+            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+            result += "REMINDERS: \n"
+            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
 
-    elif navigation_type=="DAY":
-        dates=datetime.datetime.strptime(year+"-"+month+"-"+day+"23:59:59",'%Y-%m-%d %H:%M:%S')
-        result+="EVENTS: \n"
-        result+=get_past_events(api,date.isoformat()+"Z",dates.isoformat()+"Z")
-        result+="\n"
-        result+="REMINDERS: \n"
-        result+=get_past_reminders(api,date.isoformat()+"Z",dates.isoformat()+"Z")
+    elif navigation_type == "DAY":
+        dates = datetime.datetime.strptime(year + "-" + month + "-" + day + "23:59:59", '%Y-%m-%d %H:%M:%S')
+        result += "EVENTS: \n"
+        result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+        result += "\n"
+        result += "REMINDERS: \n"
+        result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
     else:
         raise ValueError("Navigation type is wrong")
     return result
-    
-    
-def get_detailed_event(api,query):
-    events_result=api.events().list(calendarId='primary',singleEvents=True,orderBy='startTime',q=query).execute()
-    event=events_result.get("items",[])
-    detailed_description=""
-    detailed_description+="Title: "+event['summary']+"\n"
-    detailed_description+="Visibility:"+event["visibility"]+"\n"
-    detailed_description+="Status: "+event["status"]+"\n"
-    detailed_description+="Start:"+event['start'].get('dateTime', event['start'].get('date'))+"\n"
-    detailed_description+="End:"+event['end'].get('dateTime', event['end'].get('date'))+"\n"
-    detailed_description+="Location"+event["location"]+"\n"
+
+
+def get_detailed_event(api, query):
+    events_result = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+    event = events_result.get("items", [])
+    detailed_description = ""
+    detailed_description += "Title: " + event['summary'] + "\n"
+    detailed_description += "Visibility:" + event["visibility"] + "\n"
+    detailed_description += "Status: " + event["status"] + "\n"
+    detailed_description += "Start:" + event['start'].get('dateTime', event['start'].get('date')) + "\n"
+    detailed_description += "End:" + event['end'].get('dateTime', event['end'].get('date')) + "\n"
+    detailed_description += "Location" + event["location"] + "\n"
     for attendees in event["attendees"]:
-        detailed_description+=attendees.email+"\n"
+        detailed_description += attendees.email + "\n"
     return detailed_description
+
+
+def get_searched_events(api, query):
+    results = ""
+    events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+    result = events.get('items', [])
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results += event['summary'] + "," + start + "\n"
+    return results
+
+
+def get_searched_reminders(api, query):
+    reminders = ""
+    events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+    result = events.get('items', [])
+    for event in result:
+
+        if event['reminders'].get("useDefault") == True:
+            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+        else:
+            for i in event["reminders"].get("overrides", []):
+                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                    i.get("minutes")) + " minutes before event starts"
+        reminders += "\n"
+
+    return reminders
+
+
+def delete_events(api, eventID):
+    api.events().delete(calendarId='primary', eventId=eventID).execute()
+
+
+def delete_reminders(api, eventID):
+    event = api.events().get(calendarId='primary', eventId=eventID).execute()
+
+    event['reminders'] = {"useDefault": False,
+                          "overrides": []}
+
+    return api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+
 
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    past_time="2019-09-25T09:59:04.501209Z"
+    past_time = "2019-09-25T09:59:04.501209Z"
     events = get_upcoming_events(api, time_now, 10)
     if not events:
         print('No upcoming events found.')
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
+        print(event['id'], start, event['summary'])
+    print("SEARCH EVENTS")
+    print(get_searched_events(api, "hydrogen"))
+    print("SEARCH REMINDERS")
+    print(get_searched_reminders(api, "hydrogen"))
+
+    # print(delete_reminders(api,
+    #                        "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g8h1k2g9j6d1jegi275148dhg64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g8ksjie1h6gr42ghm74o3ce9k8gsjch246ks4ch9m68s3igph8p10")[
+    #           'reminders'])
+
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     main()

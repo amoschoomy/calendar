@@ -4,3 +4,5 @@ credentials.json
 token.pickle
 __pycache__/CalendarTest.cpython-38.pyc
 .coverage
+get-pip.py
+.idea/
