@@ -82,7 +82,7 @@ class CalendarTestViewUpcomingEvents(unittest.TestCase):
         ]}
         self.assertEqual(Calendar.get_upcoming_events_2(api,ex_time),"test,2020-10-03T02:00:00.000000Z")
 
-class CalendarGetUpcomingReminders(unittest.TestCase):
+class CalendarTestGetUpcomingReminders(unittest.TestCase):
     def test_get_upcoming_reminders_invalid_date(self):
         #Path 1 where execution stops after invalid date given
         ex_time="January 1 2020" #Date is of an invalid date so will throw Value Error
@@ -178,11 +178,53 @@ class CalendarGetUpcomingReminders(unittest.TestCase):
         self.assertEqual(reminders,"test,Reminder through popup 10 minutes before event starts\n")
 
 
+class CalendarTestGetPastEvents(unittest.TestCase):
+    """Test Suite for Getting Past Events"""
+    def test_get_past_events_invalid_date(self):
+        """Invalid date format, branch of date validation throws ValueError executed"""
+
+        past_time="03 October 2020"
+        time_now="8 October 2020"
+        api=Mock()
+        with self.assertRaises(ValueError):
+            Calendar.get_past_events(api,past_time,time_now)
+
+    def test_get_past_events_exceeded_date(self):
+        """Past date has exceeded start date, branch of date validation of time comparison executed"""
+        past_time="2020-10-03T00:00:00.000000Z"
+        time_now="2020-01-03T00:00:00.000000Z"
+        api=Mock()
+        with self.assertRaises(ValueError):
+            Calendar.get_past_events(api,past_time,time_now)
+
+
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_events_same_date(self,api):
+        """Same date in calendar test, boundary of ending time is the same as past time"""
+        past_time="2020-10-03T00:00:00.000000Z"
+        time_now="2020-10-03T00:00:00.000000Z"
+
+        #If its the same date and time, only events of start and end at same time can be returned
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-03T00:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-03T00:00:00.000000Z"
+                        },
+                    },
+                       
+        ]}
+        past_events=Calendar.get_past_events(api,past_time,time_now)
+        self.assertEqual(past_events,"test,2020-10-03T00:00:00.000000Z")
 
 
 def main():
     # Create the test suite from the cases above.
-    test_classes=[CalendarTest,CalendarTestViewUpcomingEvents,CalendarGetUpcomingReminders] #Test Classes 
+    test_classes=[CalendarTest,CalendarTestViewUpcomingEvents,CalendarTestGetUpcomingReminders,CalendarTestGetPastEvents] #Test Classes 
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.

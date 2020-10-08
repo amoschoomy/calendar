@@ -93,7 +93,7 @@ def get_past_events(api,starting_time,end_time=datetime.datetime.utcnow().isofor
     Shows past events given the time from today's date if date not specified
     """
     results=""
-    if end_time<=starting_time:
+    if end_time<starting_time:
         raise ValueError("End time provided is less than the starting time")
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
     if len(starting_time.split('-')) != 3: # check if the len is 3. 
@@ -103,7 +103,7 @@ def get_past_events(api,starting_time,end_time=datetime.datetime.utcnow().isofor
     result=events_result.get('items',[])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results+=(start,event['summary'])
+        results+=event['summary']+","+start
     return results
 
 
