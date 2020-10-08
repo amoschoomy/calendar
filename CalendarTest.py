@@ -1,3 +1,4 @@
+from datetime import datetime
 from time import time
 import unittest
 from unittest.mock import Mock,patch
@@ -64,7 +65,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         ]}
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(Calendar.get_upcoming_events_2(api,ex_time),"test,2020-10-03T02:00:00.000000Z")
+        self.assertEqual(Calendar.get_upcoming_events_2(api,ex_time),"test,2020-10-03T02:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_events_non_empty_events(self,api):
@@ -86,7 +87,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         upcoming_events=Calendar.get_upcoming_events_2(api,ex_time)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(upcoming_events,"test,2020-10-03T02:00:00.000000Z")
+        self.assertEqual(upcoming_events,"test,2020-10-03T02:00:00.000000Z\n")
 
 class CalendarTestGetUpcomingReminders(unittest.TestCase):
     def test_get_upcoming_reminders_invalid_date(self):
@@ -243,7 +244,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
         past_events=Calendar.get_past_events(api,past_time,time_now)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(past_events,"test,2020-10-03T00:00:00.000000Z")
+        self.assertEqual(past_events,"test,2020-10-03T00:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_past_events_valid_date_and_time(self,api):
@@ -267,7 +268,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
         past_events=Calendar.get_past_events(api,past_time,time_now)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(past_events,"test,2020-10-07T00:00:00.000000Z")
+        self.assertEqual(past_events,"test,2020-10-07T00:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_past_events_empty_events(self,api):
@@ -447,12 +448,69 @@ class CalendarTestGetPastReminders(unittest.TestCase):
 
 class CalendarTestNavigateCalendar(unittest.TestCase):
     @patch("Calendar.get_calendar_api")
-    def test_navigate_calendar_path1_invalid_date(self,api):
+    def test_navigate_calendar_path1_invalid_date_format(self,api):
         #invalid date is given as a parameter
         #will throw Attribute Error when trying to get the month,day,year attribute
         date="12 October 2020"
         with self.assertRaises(AttributeError):
             Calendar.navigate_calendar(api,date,"MONTH")
+    
+    @patch("Calendar.get_calendar_api")
+    def test_naivgate_calendar_path2_invalid_navigation_type(self,api):
+        #Invalid navigation type given as parametter
+        #Path where it will raise ValueError and stop execution immediately
+        # date="2020-10-09 01:14:28.238512"
+        date = datetime.strptime('Oct 15 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="CENTURY"
+        with self.assertRaises(ValueError):
+            Calendar.navigate_calendar(api,date,navigation_type)
+    
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path3_navigation_month_31days(self,api):
+        #Navigation path for Month of 31 days
+        #Executes the try statement only succesfully
+        date = datetime.strptime('Oct 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="MONTH"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Halloween",
+                        "start": {
+                            "dateTime": "2020-10-30T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-31T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+        
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2)
+        self.assertIn("Halloween",result)
+        self.assertIn("test",result)
+        self.assertIn("popup 10",result)
+
+
 
 
 

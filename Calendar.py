@@ -85,7 +85,7 @@ def get_upcoming_events_2(api, starting_time=datetime.datetime.utcnow().isoforma
     result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start
+        results += event['summary'] + "," + start+"\n"
     return results
 
     # Add your methods here.
@@ -112,7 +112,7 @@ def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isof
     result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start
+        results += event['summary'] + "," + start +"\n"
     return results
 
 
@@ -177,14 +177,14 @@ def navigate_calendar(api,date,navigation_type):
 
     if navigation_type == "MONTH":
         try:
-            dates = datetime.datetime.strptime(year + "-" + month + "-" + "31" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
             result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "\n"
             result += "REMINDERS: \n"
             result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
         except ValueError:
-            dates = datetime.datetime.strptime(year + "-" + month + "-" + "30" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "30" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
             result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "\n"
@@ -194,14 +194,14 @@ def navigate_calendar(api,date,navigation_type):
 
     elif navigation_type == "YEAR":
         try:
-            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
             result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "\n"
             result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "REMINDERS: \n"
         except ValueError:
-            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "30" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "30" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
             result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "\n"
@@ -210,7 +210,7 @@ def navigate_calendar(api,date,navigation_type):
             result += "\n"
 
     elif navigation_type == "DAY":
-        dates = datetime.datetime.strptime(year + "-" + month + "-" + day + "23:59:59", '%Y-%m-%d %H:%M:%S')
+        dates = datetime.datetime.strptime(year + "-" + month + "-" + day + " 23:59:59", '%Y-%m-%d %H:%M:%S')
         result += "EVENTS: \n"
         result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
         result += "\n"
