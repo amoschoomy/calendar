@@ -238,8 +238,20 @@ def get_searched_events(api,query):
     return results
 
 def get_searched_reminders(api,query):
+
+    reminders = ""
     events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-    return events["items"]
+    result = events.get('items', [])
+    for event in result:
+
+        if event['reminders'].get("useDefault")==True:
+            reminders+=event["summary"]+","+"Reminder through popup 10 minutes before event starts"
+        else:
+            for i in event["reminders"].get("overrides"):
+                reminders+=event["summary"]+","+"Reminder through "+i.get("method")+" "+str(i.get("minutes"))+" minutes before event starts"
+        reminders += "\n"
+
+    return reminders
 
 def main():
     api = get_calendar_api()
@@ -252,7 +264,7 @@ def main():
         start = event['start'].get('dateTime', event['start'].get('date'))
         print(start, event['summary'])
     print("SEARCH EVENTS")
-    print(get_searched_events(api,"hydrogen"))
+    print(get_searched_reminders(api,"make it"))
 
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
