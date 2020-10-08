@@ -10,7 +10,7 @@ The whitebox technique we will use is branch coverage. There are two visible bra
 
 This functionality is done through get_past_events method therefore we will test that method.
 
-We will use the same technique which is branch coverage except now in this method which there is 3 branches. Values(date) selected in the test cases will be according to boundary value analysis technique in blackbox testing. 
+We will use the same technique which is branch coverage except now in this method which there is 3 branches. Values(date) selected in the test cases will be according to equivalence partitioning where every values in their respective partitions that follows the 3 conditions which is < , = , > will get the same result in blackbox testing. 
 
 **Strategy for Viewing Upcoming Reminders, Viewing Past Reminders**
 
@@ -20,4 +20,4 @@ This functionalities is done through get_upcoming_reminders method and get_past_
 
 This functionality is done through two methods, the first being navigate_calendar where the user chooses which navigation type to view and reminders and events will be displayed. TO test this method, path coverage is used to cover all possible paths in this method, there are 6 possible path in this method 2^1+2^1+1+1.
 
-The second method is get_detailed_event where it returns a string of detailed event selected. Branch coverage is used as there is a for loop in the method, so 100% branch coverage will imply 100% statement coveragw
+The second method is get_detailed_event where it returns a string of detailed event selected. Branch coverage is used as there is a for loop in the method, so 100% branch coverage will imply 100% statement coverage

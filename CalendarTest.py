@@ -1,3 +1,4 @@
+from time import time
 import unittest
 from unittest.mock import Mock,patch
 import Calendar
@@ -61,6 +62,8 @@ class CalendarTestViewUpcomingEvents(unittest.TestCase):
                     },
                        
         ]}
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(Calendar.get_upcoming_events_2(api,ex_time),"test,2020-10-03T02:00:00.000000Z")
 
     @patch("Calendar.get_calendar_api")
@@ -80,7 +83,10 @@ class CalendarTestViewUpcomingEvents(unittest.TestCase):
                     },
                        
         ]}
-        self.assertEqual(Calendar.get_upcoming_events_2(api,ex_time),"test,2020-10-03T02:00:00.000000Z")
+        upcoming_events=Calendar.get_upcoming_events_2(api,ex_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertEqual(upcoming_events,"test,2020-10-03T02:00:00.000000Z")
 
 class CalendarTestGetUpcomingReminders(unittest.TestCase):
     def test_get_upcoming_reminders_invalid_date(self):
@@ -116,6 +122,8 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         ]}
         reminders=Calendar.get_upcoming_reminders(api,ex_time)
         # Two seperate assertion checks for each method of reminder is present in method output
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertIn("email 1",reminders)
         self.assertIn("popup 10",reminders)
 
@@ -126,6 +134,8 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         ex_time="2020-10-03T00:00:00.000000Z"
         api.events.return_value.list.return_value.execute.return_value ={}
         reminders=Calendar.get_upcoming_reminders(api,ex_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(reminders,"")
 
 
@@ -151,6 +161,8 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         
         ]}
         reminders=Calendar.get_upcoming_reminders(api,ex_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(reminders,"\n") #A newline is returned due to the outer for loop being executed
 
     @patch("Calendar.get_calendar_api")
@@ -175,16 +187,27 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         
         ]}
         reminders=Calendar.get_upcoming_reminders(api,ex_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(reminders,"test,Reminder through popup 10 minutes before event starts\n")
 
 
 class CalendarTestGetPastEvents(unittest.TestCase):
     """Test Suite for Getting Past Events"""
-    def test_get_past_events_invalid_date(self):
-        """Invalid date format, branch of date validation throws ValueError executed"""
+    def test_get_past_events_invalid_past_date_format(self):
+        """Invalid start date format, branch of date validation throws ValueError executed"""
 
         past_time="03 October 2020"
-        time_now="8 October 2020"
+        time_now="2020-10-03T00:00:00.000000Z"
+        api=Mock()
+        with self.assertRaises(ValueError):
+            Calendar.get_past_events(api,past_time,time_now)
+    
+    def test_get_past_events_invalid_end_date_format(self):
+        """Invalid start date format, branch of date validation throws ValueError executed"""
+
+        past_time="2020-10-03T00:00:00.000000Z"
+        time_now="15 October 2020"
         api=Mock()
         with self.assertRaises(ValueError):
             Calendar.get_past_events(api,past_time,time_now)
@@ -219,7 +242,77 @@ class CalendarTestGetPastEvents(unittest.TestCase):
                        
         ]}
         past_events=Calendar.get_past_events(api,past_time,time_now)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(past_events,"test,2020-10-03T00:00:00.000000Z")
+
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_events_valid_date_and_time(self,api):
+        #Test for the other branch of date format validity in the if statement
+        #No exceptions will be raised
+        past_time="2020-10-03T00:00:00.000000Z"
+        time_now="2020-10-15T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-07T00:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-09T00:00:00.000000Z"
+                        },
+                    },
+                       
+        ]}
+        past_events=Calendar.get_past_events(api,past_time,time_now)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertEqual(past_events,"test,2020-10-07T00:00:00.000000Z")
+
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_events_empty_events(self,api):
+        #Test for non execution of the for loop when retrieving event list
+        # Which means no events found in that time frame
+        past_time="2020-10-03T00:00:00.000000Z"
+        time_now="2020-10-15T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value={}
+        past_events=Calendar.get_past_events(api,past_time,time_now)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertEqual(past_events,"")
+
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_events_non_empty_events(self,api):
+        past_time="2020-10-03T00:00:00.000000Z"
+        time_now="2020-10-15T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-03T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-03T02:45:00.000000Z"
+                        },
+                    }, 
+                    {
+                        "summary": "Hello World",
+                        "start": {
+                            "dateTime": "2020-10-07T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-14T02:45:00.000000Z"
+                        },
+                    },
+                       
+        ]}
+        past_events=Calendar.get_past_events(api,past_time,time_now)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertIn("test",past_events)
+        self.assertIn("Hello World",past_events)
 
 
 def main():
