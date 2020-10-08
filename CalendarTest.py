@@ -373,8 +373,10 @@ class CalendarTestGetPastReminders(unittest.TestCase):
                             "dateTime": "2020-10-11T02:45:00.000000Z"
                         },"reminders":{
                             'useDefault': True,
-                            'overrides': [
-                                            ],},
+                            'overrides':[
+
+                            ]
+                            },
                     },
         
         ]}
@@ -382,9 +384,8 @@ class CalendarTestGetPastReminders(unittest.TestCase):
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(reminders,"test,Reminder through popup 10 minutes before event starts\n")
-    
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path5(self,api):
+    def test_get_past_reminders_path6(self,api):
         #This test for the 6th path where no exceptions
         #are raised, the outer for loop is executed and the else branch is
         #executed and the for loop inside the else branch
@@ -416,7 +417,7 @@ class CalendarTestGetPastReminders(unittest.TestCase):
         self.assertIn("popup 1",reminders)
 
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path6(self,api):
+    def test_get_past_reminders_path7(self,api):
         #This test for the 6th path where no exceptions
         #are raised, the outer for loop is executed and the else branch is
         #executed and the for loop inside the else branch
