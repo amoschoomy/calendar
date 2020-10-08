@@ -226,6 +226,21 @@ def get_detailed_event(api,query):
         detailed_description+=attendees.email+"\n"
     return detailed_description
 
+
+def get_searched_events(api,query):
+
+    results = ""
+    events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+    result = events.get('items',[])
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results += event['summary']+","+start + "\n"
+    return results
+
+def get_searched_reminders(api,query):
+    events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+    return events["items"]
+
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
@@ -236,6 +251,9 @@ def main():
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
         print(start, event['summary'])
+    print("SEARCH EVENTS")
+    print(get_searched_events(api,"hydrogen"))
+
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     main()
