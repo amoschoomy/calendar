@@ -138,7 +138,7 @@ def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().i
         if event['reminders'].get("useDefault") == True:
             reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
         else:
-            for i in event["reminders"].get("overrides",[]):
+            for i in event["reminders"].get("overrides", []):
                 reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
@@ -163,7 +163,7 @@ def get_upcoming_reminders(api, starting_time=datetime.datetime.utcnow().isoform
         if event['reminders'].get("useDefault") == True:
             reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
         else:
-            for i in event["reminders"].get("overrides",[]):
+            for i in event["reminders"].get("overrides", []):
                 reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
@@ -240,10 +240,8 @@ def get_searched_events(api, query):
     results = ""
     events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
     result = events.get('items', [])
-    for event in result:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start + "\n"
-    return results
+
+    return result
 
 
 def get_searched_reminders(api, query):
@@ -276,6 +274,93 @@ def delete_reminders(api, eventID):
     return api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
 
 
+def run_calendar(api):
+    print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
+    directives = ['upcoming', 'past', 'search', 'delete', 'date', 'month', 'year']
+    selected = None
+
+    while True:
+        command = input("command>").split(" ")
+        n = len(command)
+        results = ""
+
+        if not n:
+            continue
+
+        directive = command[0]
+
+        if directive == 'upcoming':
+
+            if n > 1 and command[1] == '-r':
+                results = get_upcoming_reminders(api)
+            else:
+                results = get_upcoming_events_2(api)
+
+        elif directive == 'past':
+
+            if n > 1 and command[1] == '-r':
+                results = get_past_reminders(api)
+            else:
+                results = get_past_events(api)
+
+        elif directive == 'search':
+
+            if n > 2 and command[1] == '-r':
+                results = get_searched_reminders(api, command[2])
+            elif n > 1:
+                results = get_searched_events(api, command[1])
+            else:
+                print("No search keyword.")
+                continue
+
+        elif directive == 'delete':
+
+            if selected is None:
+                print("No events selected")
+            elif n > 1 and command[1] == '-r':
+                if input("Delete reminders for selected event: " + selected['summary'] + "?").lower() == "y":
+                    delete_reminders(api, selected['id'])
+                    selected = None
+                    print("Deleted reminders sucessfully")
+            else:
+                if input("Delete selected event: " + selected['summary'] + "?").lower() == "y":
+                    delete_events(api, selected['id'])
+                    selected = None
+                    print("Deleted event sucessfully")
+            continue
+
+        else:
+            print("Invalid directive")
+            continue
+
+        selected = get_selected_event(results)
+
+
+def get_selected_event(results):
+    dict = {}
+    prompt = ""
+    for event in range(len(results)):
+        dict[event] = results[event]
+
+        start = results[event]['start'].get('dateTime', results[event]['start'].get('date'))
+        prompt += str(event) + ": " + results[event]['summary'] + "," + start + "\n"
+
+    print(prompt)
+
+    userselect = None
+    try:
+        index = int(input("Select an event: "))
+        userselect = dict[index]
+        print("Selected event: " + dict[index]['summary'])
+
+    except ValueError:
+        print("No event selected")
+    except KeyError:
+        print("No event selected")
+
+    return userselect
+
+
 def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
@@ -285,11 +370,13 @@ def main():
         print('No upcoming events found.')
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        print(event['id'], start, event['summary'])
-    print("SEARCH EVENTS")
-    print(get_searched_events(api, "hydrogen"))
-    print("SEARCH REMINDERS")
-    print(get_searched_reminders(api, "hydrogen"))
+        print(start, event['summary'])
+
+    run_calendar(api)
+    # print("SEARCH EVENTS")
+    # print(get_searched_events(api, "hydrogen"))
+    # print("SEARCH REMINDERS")
+    # print(get_searched_reminders(api, "hydrogen"))
 
     # print(delete_reminders(api,
     #                        "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g8h1k2g9j6d1jegi275148dhg64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g8ksjie1h6gr42ghm74o3ce9k8gsjch246ks4ch9m68s3igph8p10")[
