@@ -93,11 +93,16 @@ def get_past_events(api,starting_time,end_time=datetime.datetime.utcnow().isofor
     Shows past events given the time from today's date if date not specified
     """
     results=""
-    if end_time<starting_time:
-        raise ValueError("End time provided is less than the starting time")
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
     if len(starting_time.split('-')) != 3: # check if the len is 3. 
         raise ValueError("starting time provided is not of format")
+
+    # Block of code below adapted from: https://stackoverflow.com/a/48750522/
+    if len(end_time.split('-')) != 3: # check if the len is 3. 
+        raise ValueError("starting time provided is not of format")
+
+    if end_time<starting_time:
+        raise ValueError("End time provided is less than the starting time")
 
     events_result=api.events().list(calendarId='primary',timeMin=starting_time,timeMax=end_time,singleEvents=True,orderBy='startTime').execute()
     result=events_result.get('items',[])
