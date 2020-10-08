@@ -97,7 +97,7 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
             Calendar.get_upcoming_reminders(mock_api,ex_time)
 
     @patch("Calendar.get_calendar_api")
-    def test_get_upcoming_reminders_path2(self,api):
+    def test_get_upcoming_reminders_path2_two_custom_reminders(self,api):
 
         #Path 2 where the if statement of date validation succeeds, outer for loop is executed, else branch is executed
         #inside the loop, and from there the for loop in else branch is executed
@@ -128,7 +128,7 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         self.assertIn("popup 10",reminders)
 
     @patch("Calendar.get_calendar_api")
-    def test_get_upcoming_reminders_path3(self,api):
+    def test_get_upcoming_reminders_path3_no_event(self,api):
 
         #Path 3 where the if branch of date validity succeeded, the outer for loop doesn't get executed.
         ex_time="2020-10-03T00:00:00.000000Z"
@@ -139,7 +139,7 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         self.assertEqual(reminders,"")
 
     @patch("Calendar.get_calendar_api")
-    def test_get_upcoming_reminders_path4(self,api):
+    def test_get_upcoming_reminders_path4_no_reminder_set(self,api):
         #Path 4 where if branch of date validity succeeded, outer for loop is executed, else branch is executed but the for
         #loop in else branch is not executed
         ex_time="2020-10-03T00:00:00.000000Z"
@@ -165,7 +165,7 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
         self.assertEqual(reminders,"\n") #A newline is returned due to the outer for loop being executed
 
     @patch("Calendar.get_calendar_api")
-    def test_get_upcoming_reminders_path5(self,api):
+    def test_get_upcoming_reminders_path5_default_reminder(self,api):
         #Path 5 where if statement to check date validity succeeds, outer for loop is executed, and if
         #branch is executed which is default reminders
         ex_time="2020-10-03T00:00:00.000000Z"
@@ -315,7 +315,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
 
 class CalendarTestGetPastReminders(unittest.TestCase):
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path1(self,api):
+    def test_get_past_reminders_path1_starttime_wrong_format(self,api):
         #This test for the first path where the starting time is of wrong format
         #therefore ending execution immediately
         start_time="04 October 2020"
@@ -325,7 +325,7 @@ class CalendarTestGetPastReminders(unittest.TestCase):
 
 
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path2(self,api):
+    def test_get_past_reminders_path2_endtime_wrong_format(self,api):
         #This test for second path where the end time is of wrong format
         #therefore ending execution immediately
         start_time="2020-10-15T00:00:00.000000Z"
@@ -334,7 +334,7 @@ class CalendarTestGetPastReminders(unittest.TestCase):
             Calendar.get_past_reminders(api,start_time,end_time)
     
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path3(self,api):
+    def test_get_past_reminders_path3_starttime_exceeded_endtime(self,api):
         #This test for third path where the start time has exceeded
         #end time therefore ending execution immediately
         end_time="2020-10-15T00:00:00.000000Z"
@@ -343,10 +343,10 @@ class CalendarTestGetPastReminders(unittest.TestCase):
             Calendar.get_past_reminders(api,start_time,end_time)
     
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path4(self,api):
+    def test_get_past_reminders_path4_no_event(self,api):
         #This test for 4th path in the method, where
         #no exceptions are raised but the outer for loop
-        #is not executed which means no reminders present
+        #is not executed which means no events present
         start_time="2020-10-10T00:00:00.000000Z"
         end_time="2020-10-16T00:00:00.000000Z"
         api.events.return_value.list.return_value.execute.return_value ={}
@@ -356,7 +356,7 @@ class CalendarTestGetPastReminders(unittest.TestCase):
         self.assertEqual(reminders,"")
     
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path5(self,api):
+    def test_get_past_reminders_path5_default_reminder(self,api):
         #This test for the 5th path in the method, where no exceptions
         #are raised, the outer for loop is executed and the if branch is
         #executed
@@ -385,7 +385,7 @@ class CalendarTestGetPastReminders(unittest.TestCase):
             api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(reminders,"test,Reminder through popup 10 minutes before event starts\n")
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path6(self,api):
+    def test_get_past_reminders_path6_two_custom_reminders_set(self,api):
         #This test for the 6th path where no exceptions
         #are raised, the outer for loop is executed and the else branch is
         #executed and the for loop inside the else branch
@@ -417,7 +417,7 @@ class CalendarTestGetPastReminders(unittest.TestCase):
         self.assertIn("popup 1",reminders)
 
     @patch("Calendar.get_calendar_api")
-    def test_get_past_reminders_path7(self,api):
+    def test_get_past_reminders_path7_no_reminders_set(self,api):
         #This test for the 6th path where no exceptions
         #are raised, the outer for loop is executed and the else branch is
         #executed and the for loop inside the else branch
@@ -445,13 +445,24 @@ class CalendarTestGetPastReminders(unittest.TestCase):
             api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual("\n",reminders) #A new line is returned since the outer for loopm is executed
 
+class CalendarTestNavigateCalendar(unittest.TestCase):
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path1_invalid_date(self,api):
+        #invalid date is given as a parameter
+        #will throw Attribute Error when trying to get the month,day,year attribute
+        date="12 October 2020"
+        with self.assertRaises(AttributeError):
+            Calendar.navigate_calendar(api,date,"MONTH")
+
+
 
 
 
 
 def main():
     # Create the test suite from the cases above.
-    test_classes=[CalendarTest,CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,CalendarTestGetPastReminders,
+    test_classes=[CalendarTest,CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,
+    CalendarTestGetPastReminders,CalendarTestNavigateCalendar,
     CalendarTestGetPastEvents] #Test Classes 
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
