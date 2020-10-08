@@ -29,7 +29,7 @@ class CalendarTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             Calendar.get_upcoming_events(mock_api,ex_time,num_events)
 
-class CalendarTestViewUpcomingEvents(unittest.TestCase):
+class CalendarTestGetUpcomingEvents(unittest.TestCase):
     #Test Suite for User Story 1
 
     def test_get_upcoming_events_invalid_date(self):
@@ -314,10 +314,40 @@ class CalendarTestGetPastEvents(unittest.TestCase):
         self.assertIn("test",past_events)
         self.assertIn("Hello World",past_events)
 
+class CalendarTestGetPastReminders(unittest.TestCase):
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path1(self,api):
+        #This test for the first path where the starting time is of wrong format
+        #therefore ending execution immediately
+        start_time="04 October 2020"
+        end_time="2020-10-15T00:00:00.000000Z"
+        with self.assertRaises(ValueError):
+            Calendar.get_past_reminders(api,start_time,end_time)
+
+
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path2(self,api):
+        #This test for second path where the end time is of wrong format
+        #therefore ending execution immediately
+        end_time="2020-10-15T00:00:00.000000Z"
+        start_time="11 October 2020"
+        with self.assertRaises(ValueError):
+            Calendar.get_past_reminders(api,start_time,end_time)
+    
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path3(self,api):
+        #This test for third path where the start time has exceeded
+        #end time therefore ending execution immediately
+        end_time="2020-10-15T00:00:00.000000Z"
+        start_time="2020-10-16T00:00:00.000000Z"
+        with self.assertRaises(ValueError):
+            Calendar.get_past_reminders(api,start_time,end_time)
+
 
 def main():
     # Create the test suite from the cases above.
-    test_classes=[CalendarTest,CalendarTestViewUpcomingEvents,CalendarTestGetUpcomingReminders,CalendarTestGetPastEvents] #Test Classes 
+    test_classes=[CalendarTest,CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,CalendarTestGetPastReminders,
+    CalendarTestGetPastEvents] #Test Classes 
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.
