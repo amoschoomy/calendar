@@ -138,7 +138,6 @@ class CalendarTestGetUpcomingReminders(unittest.TestCase):
             api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(reminders,"")
 
-
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_reminders_path4(self,api):
         #Path 4 where if branch of date validity succeeded, outer for loop is executed, else branch is executed but the for
@@ -342,6 +341,111 @@ class CalendarTestGetPastReminders(unittest.TestCase):
         start_time="2020-10-16T00:00:00.000000Z"
         with self.assertRaises(ValueError):
             Calendar.get_past_reminders(api,start_time,end_time)
+    
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path4(self,api):
+        #This test for 4th path in the method, where
+        #no exceptions are raised but the outer for loop
+        #is not executed which means no reminders present
+        start_time="2020-10-10T00:00:00.000000Z"
+        end_time="2020-10-16T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value ={}
+        reminders=Calendar.get_past_reminders(api,start_time,end_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertEqual(reminders,"")
+    
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path5(self,api):
+        #This test for the 5th path in the method, where no exceptions
+        #are raised, the outer for loop is executed and the if branch is
+        #executed
+        start_time="2020-10-10T00:00:00.000000Z"
+        end_time="2020-10-16T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides': [
+                                            ],},
+                    },
+        
+        ]}
+        reminders=Calendar.get_past_reminders(api,start_time,end_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertEqual(reminders,"test,Reminder through popup 10 minutes before event starts\n")
+    
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path5(self,api):
+        #This test for the 6th path where no exceptions
+        #are raised, the outer for loop is executed and the else branch is
+        #executed and the for loop inside the else branch
+        #is executed
+        start_time="2020-10-10T00:00:00.000000Z"
+        end_time="2020-10-16T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-14T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': False,
+                            'overrides': [
+                                        {'method': 'email', 'minutes': 2},
+                                        {'method': 'popup', 'minutes': 1},
+    ],},
+                    },
+                       
+        ]}
+        reminders=Calendar.get_past_reminders(api,start_time,end_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertIn("email 2",reminders)
+        self.assertIn("popup 1",reminders)
+
+    @patch("Calendar.get_calendar_api")
+    def test_get_past_reminders_path6(self,api):
+        #This test for the 6th path where no exceptions
+        #are raised, the outer for loop is executed and the else branch is
+        #executed and the for loop inside the else branch
+        #is executed
+        start_time="2020-10-10T00:00:00.000000Z"
+        end_time="2020-10-16T00:00:00.000000Z"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-14T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': False,
+                            'overrides': [
+                                            ],},
+                    },
+                       
+        ]}
+        reminders=Calendar.get_past_reminders(api,start_time,end_time)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 1)
+        self.assertEqual("\n",reminders) #A new line is returned since the outer for loopm is executed
+
+
+
 
 
 def main():
