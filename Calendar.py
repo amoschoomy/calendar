@@ -213,17 +213,25 @@ def navigate_calendar(api,date,navigation_type):
 
 
 def get_detailed_event(api, query):
+
     events_result = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
     event = events_result.get("items", [])
+    if len(event)!=1:
+        raise ValueError("Please give the full name of the event.")
     detailed_description = ""
-    detailed_description += "Title: " + event['summary'] + "\n"
-    detailed_description += "Visibility:" + event["visibility"] + "\n"
-    detailed_description += "Status: " + event["status"] + "\n"
-    detailed_description += "Start:" + event['start'].get('dateTime', event['start'].get('date')) + "\n"
-    detailed_description += "End:" + event['end'].get('dateTime', event['end'].get('date')) + "\n"
-    detailed_description += "Location" + event["location"] + "\n"
-    for attendees in event["attendees"]:
-        detailed_description += attendees.email + "\n"
+    detailed_description += "Title: " + event[0]['summary'] + "\n"
+    if event[0].get("visibility") is not None:
+        detailed_description += "Visibility:" + event[0].get("visibility") + "\n"
+    detailed_description += "Status: " + event[0]["status"] + "\n"
+    detailed_description+="Created: " + event[0]["created"] + "\n"
+    detailed_description+="Creator: " + event[0]["creator"].get("email") + "\n"
+    detailed_description += "Start: " + event[0]['start'].get('dateTime', event[0]['start'].get('date')) + "\n"
+    detailed_description += "End: " + event[0]['end'].get('dateTime', event[0]['end'].get('date')) + "\n"
+    if event[0].get("location") is not None:
+        detailed_description += "Location: " + event[0].get("location") + "\n"
+    if event[0].get("attendees") is not None:
+        for attendees in event[0]["attendees"]:
+            detailed_description += attendees.email + "\n"
     return detailed_description
 
 
@@ -356,14 +364,13 @@ def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     past_time = "2019-09-25T09:59:04.501209Z"
-    events = get_upcoming_events(api, time_now, 10)
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
-
-    run_calendar(api)
+    # events = get_upcoming_events(api, time_now, 10)
+    # if not events:
+    #     print('No upcoming events found.')
+    # for event in events:
+    #     start = event['start'].get('dateTime', event['start'].get('date'))
+    #     print(start, event['summary'])
+    # run_calendar(api)
     # print("SEARCH EVENTS")
     # print(get_searched_events(api, "hydrogen"))
     # print("SEARCH REMINDERS")
