@@ -505,10 +505,118 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
         ]}
         result=Calendar.navigate_calendar(api,date,navigation_type)
         self.assertEqual(
-            api.events.return_value.list.return_value.execute.call_count, 2)
-        self.assertIn("Halloween",result)
-        self.assertIn("test",result)
-        self.assertIn("popup 10",result)
+            api.events.return_value.list.return_value.execute.call_count, 2) #  Mock method called twice
+            #First in getting events, second in getting reminders
+
+        self.assertIn("Halloween",result) #Assert title of calendar in result string returned
+        self.assertIn("test",result) #Assert title of calendar in result string returned
+        self.assertIn("popup 10",result) #Assert reminder in result string returned
+
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path4_month_30days(self,api):
+        date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="MONTH"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Birthday Party",
+                        "start": {
+                            "dateTime": "2020-06-30T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-30T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+        
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2) #Mock method called twice
+            #First in getting events, second in getting reminders
+        self.assertIn("test",result) #Assert title in result
+        self.assertIn("Birthday Party",result) #Assert title in result
+        self.assertIn("popup 10",result) #Assert reminder in result
+    
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path5_year(self,api):
+        date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="YEAR"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Birthday Party",
+                        "start": {
+                            "dateTime": "2020-04-30T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-04-30T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "New Year Day Countdown",
+                        "start": {
+                            "dateTime": "2020-30-31T23:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-30-31T223:59:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+        
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2) #Mock method called twice
+            #First in getting events, second in getting reminders
+        self.assertIn("test",result) #Assert title in result
+        self.assertIn("Birthday Party",result) #Assert title in result
+        self.assertIn("New Year Day Countdown",result) #Assert title in result
+        self.assertIn("popup 10",result) #Assert reminder in result
+
+
+
 
 
 

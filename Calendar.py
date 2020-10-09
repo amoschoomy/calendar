@@ -193,21 +193,12 @@ def navigate_calendar(api,date,navigation_type):
             result += "\n"
 
     elif navigation_type == "YEAR":
-        try:
-            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
-            result += "EVENTS: \n"
-            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "\n"
-            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "REMINDERS: \n"
-        except ValueError:
-            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "30" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
-            result += "EVENTS: \n"
-            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "\n"
-            result += "REMINDERS: \n"
-            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "\n"
+        dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
+        result += "EVENTS: \n"
+        result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+        result += "\n"
+        result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+        result += "REMINDERS: \n"
 
     elif navigation_type == "DAY":
         dates = datetime.datetime.strptime(year + "-" + month + "-" + day + " 23:59:59", '%Y-%m-%d %H:%M:%S')
