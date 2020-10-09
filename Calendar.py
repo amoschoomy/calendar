@@ -212,26 +212,29 @@ def navigate_calendar(api,date,navigation_type):
     return result
 
 
-def get_detailed_event(api, query):
+def get_detailed_event(event):
+    detailed_description=""
+    if event.get("summary")==None: #None means no key for event title, subsequent event data cannnot be retrieved
+        raise ValueError("Wrong argument passed into")
+    #NOTE:
+    #if parameter passed in is of other type, Attribute Errors will be raised
+    detailed_description += "Title: " + event['summary'] + "\n"
 
-    events_result = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-    event = events_result.get("items", [])
-    if len(event)!=1:
-        raise ValueError("Please give the full name of the event.")
-    detailed_description = ""
-    detailed_description += "Title: " + event[0]['summary'] + "\n"
-    if event[0].get("visibility") is not None:
-        detailed_description += "Visibility:" + event[0].get("visibility") + "\n"
-    detailed_description += "Status: " + event[0]["status"] + "\n"
-    detailed_description+="Created: " + event[0]["created"] + "\n"
-    detailed_description+="Creator: " + event[0]["creator"].get("email") + "\n"
-    detailed_description += "Start: " + event[0]['start'].get('dateTime', event[0]['start'].get('date')) + "\n"
-    detailed_description += "End: " + event[0]['end'].get('dateTime', event[0]['end'].get('date')) + "\n"
-    if event[0].get("location") is not None:
-        detailed_description += "Location: " + event[0].get("location") + "\n"
-    if event[0].get("attendees") is not None:
-        for attendees in event[0]["attendees"]:
-            detailed_description += attendees.email + "\n"
+    if event.get("visibility") is not None:
+        detailed_description += "Visibility: " + event.get("visibility") + "\n"
+    detailed_description += "Status: " + event["status"] + "\n"
+    detailed_description+="Created: " + event["created"] + "\n"
+    detailed_description+="Creator: " + event["creator"].get("email") + "\n"
+    detailed_description += "Start: " + event['start'].get('dateTime', event['start'].get('date')) + "\n"
+    detailed_description += "End: " + event['end'].get('dateTime', event['end'].get('date')) + "\n"
+    if event.get("location") is not None:
+        detailed_description += "Location: " + event.get("location") + "\n"
+    if event.get("attendees") is not None:
+        detailed_description+="Attendees: "
+        for attendees in event["attendees"]:
+            detailed_description +=attendees.get("email") + ", "
+    detailed_description+=detailed_description[:-2] #strip commas at the end
+    detailed_description+="\n"
     return detailed_description
 
 

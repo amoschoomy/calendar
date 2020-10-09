@@ -661,51 +661,11 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
 
 class CalendarTestGetDetailedEvent(unittest.TestCase):
 
-    @patch("Calendar.get_calendar_api")
-    def test_get_detailed_event_query_not_specific_enough(self,api):
-        #THis test for user inputting query that returns two or more event
-        api.events.return_value.list.return_value.execute.return_value = {
-        "items": [
-                    {
-                        "summary": "test",
-                        "start": {
-                            "dateTime": "2020-06-10T02:00:00.000000Z"
-                        },
-                        "end": {
-                            "dateTime": "2020-06-10T02:45:00.000000Z"
-                        },"reminders":{
-                            'useDefault': True,
-                            'overrides':[
-
-                            ]
-                            },
-                    },
-                    {
-                        "summary": "tester",
-                        "start": {
-                            "dateTime": "2020-06-10T12:00:00.000000Z"
-                        },
-                        "end": {
-                            "dateTime": "2020-06-10T12:45:00.000000Z"
-                        },"reminders":{
-                            'useDefault': True,
-                            'overrides':[
-
-                            ]
-                            },
-                    },
-        
-        ]}
-        with self.assertRaises(ValueError):
-            Calendar.get_detailed_event(api,"test")
-    
-    @patch("Calendar.get_calendar_api")
-    def test_get_detailed_event_no_visibility(self,api):
+ 
+    def test_get_detailed_event_path1_no_visibility_set_no_attendees_set_location_set(self):
         #This test for the events that have no visibility key aka
         #default visibility
-        api.events.return_value.list.return_value.execute.return_value = {
-        "items": [
-                    {
+        event ={
                         "summary": "Debate",
                         "start": {
                             "dateTime": "2020-06-10T02:00:00.000000Z"
@@ -721,18 +681,13 @@ class CalendarTestGetDetailedEvent(unittest.TestCase):
                         "status": "confirmed",
                         'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
                         'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
-                        'created':'2020-10-09T04:10:47.000Z'
+                        'created':'2020-10-09T04:10:47.000Z',
 
-                    },
-        ]}
-        detailed_event=Calendar.get_detailed_event(api,"Debate")
-        self.assertEqual(
-            api.events.return_value.list.return_value.execute.call_count, 1)
+                    }
+        detailed_event=Calendar.get_detailed_event(event)
         self.assertNotIn("Visibility",detailed_event) #if default visiblity, no visibility key
         #found in json result, therefore string to print event visibility is not executed
-        
 
-    
 
 
 
