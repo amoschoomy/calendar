@@ -55,21 +55,8 @@ def get_calendar_api():
     return build('calendar', 'v3', credentials=creds)
 
 
-def get_upcoming_events(api, starting_time, number_of_events):
-    """
-    Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next n events on the user's calendar.
-    """
-    if (number_of_events <= 0):
-        raise ValueError("Number of events must be at least 1.")
 
-    events_result = api.events().list(calendarId='primary', timeMin=starting_time,
-                                      maxResults=number_of_events, singleEvents=True,
-                                      orderBy='startTime').execute()
-    return events_result.get('items', [])
-
-
-def get_upcoming_events_2(api, starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Get all upcoming events
 
@@ -367,7 +354,7 @@ def main():
     api = get_calendar_api()
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     past_time = "2019-09-25T09:59:04.501209Z"
-    # events = get_upcoming_events(api, time_now, 10)
+    events = get_upcoming_events(api, time_now, 10)
     # if not events:
     #     print('No upcoming events found.')
     # for event in events:
