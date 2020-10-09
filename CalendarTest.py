@@ -5,31 +5,6 @@ from unittest.mock import Mock,patch
 import Calendar
 # Add other imports here if needed
 
-class CalendarTest(unittest.TestCase):
-    # This test tests number of upcoming events.
-    def test_get_upcoming_events_number(self):
-        num_events = 2
-        time = "2020-08-03T00:00:00.000000Z"
-
-        mock_api = Mock()
-        events = Calendar.get_upcoming_events(mock_api, time, num_events)
-
-        self.assertEqual(
-            mock_api.events.return_value.list.return_value.execute.return_value.get.call_count, 1)
-
-        args, kwargs = mock_api.events.return_value.list.call_args_list[0]
-        self.assertEqual(kwargs['maxResults'], num_events)
-
-    # Add more test cases here
-    #This test tests for assertion error raised if number of events
-    def test_get_upcoming_events_negative_number(self):
-        num_events=-1
-        ex_time="2020-08-03T00:00:00.000000Z"
-
-        mock_api=Mock()
-        with self.assertRaises(ValueError):
-            Calendar.get_upcoming_events(mock_api,ex_time,num_events)
-
 class CalendarTestGetUpcomingEvents(unittest.TestCase):
     #Test Suite for User Story 1
 
@@ -39,7 +14,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         ex_time="January 1 2020" #Date is of an invalid date so will throw Value Error
         mock_api=Mock() #Mock api
         with self.assertRaises(ValueError):
-            Calendar.get_upcoming_events_2(mock_api,ex_time)
+            Calendar.get_upcoming_events(mock_api,ex_time)
 
 
     @patch("Calendar.get_calendar_api")
@@ -49,7 +24,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         """
 
         ex_time="2020-08-03T00:00:00.000000Z" #Valid date is given
-        events=Calendar.get_upcoming_events_2(api,ex_time)
+        events=Calendar.get_upcoming_events(api,ex_time)
         api.events.return_value.list.return_value.execute.return_value = {
         "items": [
                     {
@@ -65,7 +40,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         ]}
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(Calendar.get_upcoming_events_2(api,ex_time),"test,2020-10-03T02:00:00.000000Z\n")
+        self.assertEqual(Calendar.get_upcoming_events(api,ex_time),"test,2020-10-03T02:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_events_non_empty_events(self,api):
@@ -84,7 +59,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
                     },
                        
         ]}
-        upcoming_events=Calendar.get_upcoming_events_2(api,ex_time)
+        upcoming_events=Calendar.get_upcoming_events(api,ex_time)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(upcoming_events,"test,2020-10-03T02:00:00.000000Z\n")
@@ -808,7 +783,7 @@ class CalendarTestGetDetailedEvent(unittest.TestCase):
 
 def main():
     # Create the test suite from the cases above.
-    test_classes=[CalendarTest,CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,
+    test_classes=[CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,
     CalendarTestGetPastReminders,CalendarTestNavigateCalendar,
     CalendarTestGetDetailedEvent,
     CalendarTestGetPastEvents] #Test Classes 
