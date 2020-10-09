@@ -1,3 +1,4 @@
+from datetime import datetime
 from time import time
 import unittest
 from unittest.mock import Mock, patch
@@ -244,7 +245,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
         past_events = Calendar.get_past_events(api, past_time, time_now)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(past_events, "test,2020-10-03T00:00:00.000000Z")
+        self.assertEqual(past_events,"test,2020-10-03T00:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_past_events_valid_date_and_time(self, api):
@@ -268,7 +269,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
         past_events = Calendar.get_past_events(api, past_time, time_now)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(past_events, "test,2020-10-07T00:00:00.000000Z")
+        self.assertEqual(past_events,"test,2020-10-07T00:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_past_events_empty_events(self, api):
@@ -450,12 +451,357 @@ class CalendarTestGetPastReminders(unittest.TestCase):
 
 class CalendarTestNavigateCalendar(unittest.TestCase):
     @patch("Calendar.get_calendar_api")
-    def test_navigate_calendar_path1_invalid_date(self, api):
-        # invalid date is given as a parameter
-        # will throw Attribute Error when trying to get the month,day,year attribute
-        date = "12 October 2020"
+    def test_navigate_calendar_path1_invalid_date_format(self,api):
+        #invalid date is given as a parameter
+        #will throw Attribute Error when trying to get the month,day,year attribute
+        date="12 October 2020"
         with self.assertRaises(AttributeError):
-            Calendar.navigate_calendar(api, date, "MONTH")
+            Calendar.navigate_calendar(api,date,"MONTH")
+
+    @patch("Calendar.get_calendar_api")
+    def test_naivgate_calendar_path2_invalid_navigation_type(self,api):
+        #Invalid navigation type given as parametter
+        #Path where it will raise ValueError and stop execution immediately
+        # date="2020-10-09 01:14:28.238512"
+        date = datetime.strptime('Oct 15 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="CENTURY"
+        with self.assertRaises(ValueError):
+            Calendar.navigate_calendar(api,date,navigation_type)
+
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path3_navigation_month_31days(self,api):
+        #Navigation path for Month of 31 days
+        #Executes the try statement only succesfully
+        date = datetime.strptime('Oct 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="MONTH"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-10-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Halloween",
+                        "start": {
+                            "dateTime": "2020-10-30T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-31T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2) #  Mock method called twice
+            #First in getting events, second in getting reminders
+
+        self.assertIn("Halloween",result) #Assert title of calendar in result string returned
+        self.assertIn("test",result) #Assert title of calendar in result string returned
+        self.assertIn("popup 10",result) #Assert reminder in result string returned
+
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path4_month_30days(self,api):
+        date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="MONTH"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Birthday Party",
+                        "start": {
+                            "dateTime": "2020-06-30T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-30T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2) #Mock method called twice
+            #First in getting events, second in getting reminders
+        self.assertIn("test",result) #Assert title in result
+        self.assertIn("Birthday Party",result) #Assert title in result
+        self.assertIn("popup 10",result) #Assert reminder in result
+
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path5_year(self,api):
+        date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="YEAR"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-11T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Birthday Party",
+                        "start": {
+                            "dateTime": "2020-02-30T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-04-30T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "New Year Day Countdown",
+                        "start": {
+                            "dateTime": "2020-30-31T23:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-30-31T223:59:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2) #Mock method called twice
+            #First in getting events, second in getting reminders
+        self.assertIn("test",result) #Assert title in result
+        self.assertIn("Birthday Party",result) #Assert title in result
+        self.assertIn("New Year Day Countdown",result) #Assert title in result
+        self.assertIn("popup 10",result) #Assert reminder in result
+
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path6_day(self,api):
+        date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type="DAY"
+        api.events.return_value.list.return_value.execute.return_value = {
+        "items": [
+                    {
+                        "summary": "test",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+                    {
+                        "summary": "Birthday Party",
+                        "start": {
+                            "dateTime": "2020-06-10T12:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T12:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                    },
+
+        ]}
+        result=Calendar.navigate_calendar(api,date,navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2) #Mock method called twice
+            #First in getting events, second in getting reminders
+        self.assertIn("test",result) #Assert title in result
+        self.assertIn("Birthday Party",result) #Assert title in result
+        self.assertIn("popup 10",result) #Assert reminder in result
+
+class CalendarTestGetDetailedEvent(unittest.TestCase):
+
+
+    def test_get_detailed_event_raise_value_error(self):
+        event ={
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                        "status": "confirmed",
+                        'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
+                        'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                        'created':'2020-10-09T04:10:47.000Z',
+
+                    }
+        with self.assertRaises(ValueError):
+            Calendar.get_detailed_event(event)
+
+    def test_get_detailed_event_raise_attribute_error(self):
+        event ="FAKE EVENT"
+        with self.assertRaises(AttributeError):
+            Calendar.get_detailed_event(event)
+
+    def test_get_detailed_event_no_visibility_set_attendees_set_no_location_set(self):
+        #This test for the events that have no visibility key aka
+        #default visibility
+        event ={
+                        "summary": "Debate",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                        "status": "confirmed",
+                        'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                        'created':'2020-10-09T04:10:47.000Z',
+                        'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},{'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+
+                    }
+        detailed_event=Calendar.get_detailed_event(event)
+        #Attendees are included in the event but not visiblity or location
+        #Asserts the presence of string information of attendees
+        self.assertIn("Attendees: trump@monash.edu, donald@monash.edu",detailed_event)
+
+    def test_get_detailed_event_visibility_set_no_attendees_set_no_location_set(self):
+        #This test for the events that have no visibility key aka
+        #default visibility
+        event ={
+                        "summary": "Debate",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                        "status": "confirmed",
+                        'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                        'created':'2020-10-09T04:10:47.000Z',
+                        'visibility':"private",
+
+                    }
+        detailed_event=Calendar.get_detailed_event(event)
+        #Assert this method output change where visiblity is part of the event
+        self.assertIn("Visibility: private",detailed_event)
+
+    def test_get_detailed_event_no_visibility_set_no_attendees_set_location_set(self):
+        #This test for the events that have no visibility key aka
+        #default visibility
+        event ={
+                        "summary": "Debate",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                        "status": "confirmed",
+                        'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                        'created':'2020-10-09T04:10:47.000Z',
+                        'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
+                        'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},{'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+
+                    }
+        detailed_event=Calendar.get_detailed_event(event)
+        #Assert this  method output change where location is included in the event
+        self.assertIn("Location: Monash University, Wellington Rd, Clayton VIC 3800, Australia",detailed_event)
+
+    def test_get_detailed_event_visibility_set_attendees_set_location_set(self):
+        #This test for the events that have no visibility key aka
+        #default visibility
+        event ={
+                        "summary": "Debate",
+                        "start": {
+                            "dateTime": "2020-06-10T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-06-10T02:45:00.000000Z"
+                        },"reminders":{
+                            'useDefault': True,
+                            'overrides':[
+
+                            ]
+                            },
+                        "status": "confirmed",
+                        'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                        'created':'2020-10-09T04:10:47.000Z',
+                        'visibility':"private",
+                        'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
+                        'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},{'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+
+                    }
+        detailed_event=Calendar.get_detailed_event(event)
+
+        #Assert all keys found succesfully and string containing the information is printed
+        self.assertIn("Visibility: private",detailed_event)
+        self.assertIn("Location: Monash University, Wellington Rd, Clayton VIC 3800, Australia",detailed_event)
+        self.assertIn("Attendees: trump@monash.edu, donald@monash.edu",detailed_event)
 
 
 class CalenderTestSearchEvents(unittest.TestCase):
@@ -581,9 +927,10 @@ class TestSearchReminders(unittest.TestCase):
 
 def main():
     # Create the test suite from the cases above.
-    test_classes = [CalendarTest, CalendarTestGetUpcomingEvents, CalendarTestGetUpcomingReminders,
-                    CalendarTestGetPastReminders, CalendarTestNavigateCalendar,
-                    CalendarTestGetPastEvents]  # Test Classes
+    test_classes=[CalendarTestGetUpcomingEvents,CalendarTestGetUpcomingReminders,
+    CalendarTestGetPastReminders,CalendarTestNavigateCalendar,
+    CalendarTestGetDetailedEvent,
+    CalendarTestGetPastEvents] #Test Classes
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.

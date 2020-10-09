@@ -55,21 +55,8 @@ def get_calendar_api():
     return build('calendar', 'v3', credentials=creds)
 
 
-def get_upcoming_events(api, starting_time, number_of_events):
-    """
-    Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next n events on the user's calendar.
-    """
-    if (number_of_events <= 0):
-        raise ValueError("Number of events must be at least 1.")
 
-    events_result = api.events().list(calendarId='primary', timeMin=starting_time,
-                                      maxResults=number_of_events, singleEvents=True,
-                                      orderBy='startTime').execute()
-    return events_result.get('items', [])
-
-
-def get_upcoming_events_2(api, starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
+def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Get all upcoming events
 
@@ -85,8 +72,8 @@ def get_upcoming_events_2(api, starting_time=datetime.datetime.utcnow().isoforma
     result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start
-    return result
+        results += event['summary'] + "," + start+"\n"
+    return results
 
     # Add your methods here.
 
@@ -112,14 +99,14 @@ def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isof
     result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start
+        results += event['summary'] + "," + start +"\n"
     return results
 
 
 def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
     """
     Shows past reminders given a start date and/if end time specified
-    
+
     """
     # Block of code below adapted from: https://stackoverflow.com/a/48750522/
     if len(starting_time.split('-')) != 3:  # check if the len is 3.
@@ -177,14 +164,14 @@ def navigate_calendar(api,date,navigation_type):
 
     if navigation_type == "MONTH":
         try:
-            dates = datetime.datetime.strptime(year + "-" + month + "-" + "31" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
             result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "\n"
             result += "REMINDERS: \n"
             result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
         except ValueError:
-            dates = datetime.datetime.strptime(year + "-" + month + "-" + "30" + "23:59:59", '%Y-%m-%d %H:%M:%S')
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "30" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
             result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
             result += "\n"
@@ -193,24 +180,15 @@ def navigate_calendar(api,date,navigation_type):
             result += "\n"
 
     elif navigation_type == "YEAR":
-        try:
-            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + "23:59:59", '%Y-%m-%d %H:%M:%S')
-            result += "EVENTS: \n"
-            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "\n"
-            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "REMINDERS: \n"
-        except ValueError:
-            dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "30" + "23:59:59", '%Y-%m-%d %H:%M:%S')
-            result += "EVENTS: \n"
-            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "\n"
-            result += "REMINDERS: \n"
-            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
-            result += "\n"
+        dates = datetime.datetime.strptime(year + "-" + "12" + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
+        result += "EVENTS: \n"
+        result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+        result += "\n"
+        result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+        result += "REMINDERS: \n"
 
     elif navigation_type == "DAY":
-        dates = datetime.datetime.strptime(year + "-" + month + "-" + day + "23:59:59", '%Y-%m-%d %H:%M:%S')
+        dates = datetime.datetime.strptime(year + "-" + month + "-" + day + " 23:59:59", '%Y-%m-%d %H:%M:%S')
         result += "EVENTS: \n"
         result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
         result += "\n"
@@ -221,18 +199,29 @@ def navigate_calendar(api,date,navigation_type):
     return result
 
 
-def get_detailed_event(api, query):
-    events_result = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-    event = events_result.get("items", [])
-    detailed_description = ""
+def get_detailed_event(event):
+    detailed_description=""
+    if event.get("summary")==None: #None means no key for event title, subsequent event data cannnot be retrieved
+        raise ValueError("Wrong argument passed into")
+    #NOTE:
+    #if parameter passed in is of other type, Attribute Errors will be raised
     detailed_description += "Title: " + event['summary'] + "\n"
-    detailed_description += "Visibility:" + event["visibility"] + "\n"
+
+    if event.get("visibility") is not None:
+        detailed_description += "Visibility: " + event.get("visibility") + "\n"
     detailed_description += "Status: " + event["status"] + "\n"
-    detailed_description += "Start:" + event['start'].get('dateTime', event['start'].get('date')) + "\n"
-    detailed_description += "End:" + event['end'].get('dateTime', event['end'].get('date')) + "\n"
-    detailed_description += "Location" + event["location"] + "\n"
-    for attendees in event["attendees"]:
-        detailed_description += attendees.email + "\n"
+    detailed_description+="Created: " + event["created"] + "\n"
+    detailed_description+="Creator: " + event["creator"].get("email") + "\n"
+    detailed_description += "Start: " + event['start'].get('dateTime', event['start'].get('date')) + "\n"
+    detailed_description += "End: " + event['end'].get('dateTime', event['end'].get('date')) + "\n"
+    if event.get("location") is not None:
+        detailed_description += "Location: " + event.get("location") + "\n"
+    if event.get("attendees") is not None:
+        detailed_description+="Attendees: "
+        for attendees in event["attendees"]:
+            detailed_description +=attendees.get("email") + ", "
+    detailed_description+=detailed_description[:-2] #strip commas at the end
+    detailed_description+="\n"
     return detailed_description
 
 
@@ -377,13 +366,12 @@ def main():
     time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     past_time = "2019-09-25T09:59:04.501209Z"
     events = get_upcoming_events(api, time_now, 10)
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
-
-    run_calendar(api)
+    # if not events:
+    #     print('No upcoming events found.')
+    # for event in events:
+    #     start = event['start'].get('dateTime', event['start'].get('date'))
+    #     print(start, event['summary'])
+    # run_calendar(api)
     # print("SEARCH EVENTS")
     # print(get_searched_events(api, "hydrogen"))
     # print("SEARCH REMINDERS")
