@@ -86,7 +86,7 @@ def get_upcoming_events_2(api, starting_time=datetime.datetime.utcnow().isoforma
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
         results += event['summary'] + "," + start
-    return results
+    return result
 
     # Add your methods here.
 
@@ -237,14 +237,25 @@ def get_detailed_event(api, query):
 
 
 def get_searched_events(api, query):
-    results = ""
+    if query is None:
+        raise TypeError
+    elif query.strip() == "":
+        raise ValueError
     events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+    results = ""
     result = events.get('items', [])
-
-    return result
-
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results += event['summary'] + "," + start
+    return results
 
 def get_searched_reminders(api, query):
+
+    if query is None:
+        raise TypeError
+    elif query.strip() == "":
+        raise ValueError
+
     reminders = ""
     events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
     result = events.get('items', [])
