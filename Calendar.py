@@ -163,7 +163,23 @@ def navigate_calendar(api,date,navigation_type):
     year=str(date.year)
     day=str(date.day)
 
-    if navigation_type == "MONTH":
+    if navigation_type=="MONTH" and month=="2":
+        try:
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "28" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
+            result += "EVENTS: \n"
+            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+            result += "REMINDERS: \n"
+            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+        except ValueError:
+            dates = datetime.datetime.strptime(year + "-" + month + "-" + "29" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
+            result += "EVENTS: \n"
+            result += get_past_events(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+            result += "REMINDERS: \n"
+            result += get_past_reminders(api, date.isoformat() + "Z", dates.isoformat() + "Z")
+            result += "\n"
+    elif navigation_type == "MONTH":
         try:
             dates = datetime.datetime.strptime(year + "-" + month + "-" + "31" + " 23:59:59", '%Y-%m-%d %H:%M:%S')
             result += "EVENTS: \n"
@@ -221,7 +237,7 @@ def get_detailed_event(event):
         detailed_description+="Attendees: "
         for attendees in event["attendees"]:
             detailed_description +=attendees.get("email") + ", "
-    detailed_description+=detailed_description[:-2] #strip commas at the end
+    detailed_description=detailed_description[:-2] #strip commas at the end
     detailed_description+="\n"
     return detailed_description
 
@@ -287,89 +303,19 @@ def delete_reminders(api, eventID):
 
         return retval.get('updated', None)
 
-
-
-
-# def run_calendar(api):
-#     print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
-#     print("Commands available:")
-#     directives = ['upcoming', 'past', 'search', 'delete', 'date', 'month', 'year',"day","help"]
-#     for command in directives:
-#         print(command)
-#     print("\n")
-#     selected = None
-
-
-#     while True:
-#         command = input("command>").split(" ")
-#         n = len(command)
-#         results = ""
-
-#         if not n:
-#             continue
-
-#         directive = command[0]
-
-#         if directive == 'upcoming':
-
-#             if n > 1 and command[1] == '-r':
-#                 results = get_upcoming_reminders(api)
-#             else:
-#                 results = get_upcoming_events(api)
-
-#         elif directive == 'past':
-
-#             if n > 1 and command[1] == '-r':
-#                 results = get_past_reminders(api)
-#             else:
-#                 results = get_past_events(api)
-
-#         elif directive == 'search':
-
-#             if n > 2 and command[1] == '-r':
-#                 results = get_searched_reminders(api, command[2])
-#             elif n > 1:
-#                 results = get_searched_events(api, command[1])
-#             else:
-#                 print("No search keyword.")
-#                 continue
-
-#         elif directive == 'delete':
-
-#             if selected is None:
-#                 print("No events selected")
-#             elif n > 1 and command[1] == '-r':
-#                 if input("Delete reminders for selected event: " + selected['summary'] + "?").lower() == "y":
-#                     delete_reminders(api, selected['id'])
-#                     selected = None
-#                     print("Deleted reminders sucessfully")
-#             else:
-#                 if input("Delete selected event: " + selected['summary'] + "?").lower() == "y":
-#                     delete_events(api, selected['id'])
-#                     selected = None
-#                     print("Deleted event sucessfully")
-#             continue
-
-#         else:
-#             print("Invalid directive")
-#             continue
-
-#         selected = get_selected_event(results)
-
 def run_calendar(api):
     print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
     today=datetime.datetime.today().strftime('%Y-%m-%d')
     print("Todays date(YY-MM-DD): "+today)
     print("Commands available:")
     directives = ['upcoming -e', 'past -e', 'search -e', 'delete -e',"upcoming -r","past -r","search -r",'delete -r', 
-                'date',"help","navigate","exit"]
+                'date',"help","navigate","exit","exit nav"]
     for directive in directives:
         print(directive)
     print("-e is for events, while -r is for reminders")
     print("\n")
     while True:
         command = input("command>")
-        results = ""
         if command not in directives:
             print("Invalid command. Please try again!")
             continue
@@ -381,13 +327,68 @@ def run_calendar(api):
             while True:
                 try:
                     past_date=input("Enter the date how long in the past in YYYY-MM-DD format only: ")
-                    date = datetime.datetime.strptime(past_date, "%Y-%m-%d").isoformat()+"000000Z"
+                    date = datetime.datetime.strptime(past_date, "%Y-%m-%d").isoformat()+".000000Z"
                     print(date)
-                    past_time = "2019-10-03T00:00:00.000000Z"
-                    print(get_past_events(api,past_time))
+                    print(get_past_events(api,date))
                     break
                 except ValueError:
                     print("Wrong format please try again")
+        elif command=="past -r":
+            while True:
+                try:
+                    past_date=input("Enter the date how long in the past in YYYY-MM-DD format only: ")
+                    date = datetime.datetime.strptime(past_date, "%Y-%m-%d").isoformat()+".000000Z"
+                    print(get_past_reminders(api,date))
+                    break
+                except ValueError:
+                    print("Wrong format please try again")
+        elif command=="search -e":
+            query=input("Enter search query: ")
+            print(get_searched_events(api,query))
+        elif command=="search -r":
+            query=input("Enter search query: ")
+            print(get_searched_reminders(api,query))
+        
+        elif command=="delete -r":
+            query=input("Input full name of the event of the reminder you'd like to delete")
+            events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+            selected=get_selected_event(events.get('items', []))
+            delete_reminders(api,selected)
+            print("Deleted reminder succesfully")
+
+        elif command=="navigate":
+            nav_type=["MONTH","DAY","YEAR"]
+            while True:
+                print("Choose navigation type: ")
+                for i in range(len(nav_type)):
+                    print(str(i)+": "+nav_type[i])
+                try:
+                    nav=int(input())
+                    nav_date=input("Enter date of navigation in DD M YYYY where M is the month name in full format: ")
+                    date_inputted = datetime.datetime.strptime(nav_date, '%d %B %Y')
+                    date=date_formatter(date_inputted,nav_type[nav])
+                    print(navigate_calendar(api,date,nav_type[nav]))
+                    decision=input("View? y/n \n")
+                    if decision=="y":
+                        event=input("Input full name of the event: ")
+                        events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=event).execute()
+                        sole_event=get_selected_event(events.get('items', []))
+                        print(get_detailed_event(sole_event))
+                        des=input(("Delete? y/n \n"))
+                        if des=="y":
+                            delete_events(api,sole_event['id'])
+                            print("Deleted event sucessfully")
+                    else:
+                        break
+                except ValueError:
+                    print("Wrong input. Try again")
+                    continue
+
+
+                
+
+
+            
 
 
 
@@ -405,7 +406,7 @@ def get_selected_event(results):
 
         start = results[event]['start'].get('dateTime', results[event]['start'].get('date'))
         prompt += str(event) + ": " + results[event]['summary'] + "," + start + "\n"
-
+    # if dict
     print(prompt)
 
     userselect = None
@@ -421,13 +422,17 @@ def get_selected_event(results):
 
     return userselect
 
+def date_formatter(date_inputted,nav_type):
+    if nav_type=="MONTH":
+        return datetime.datetime.strptime("01"+str(date_inputted.month)+str(date_inputted.year),'%d%m%Y')
+    elif nav_type=="YEAR":
+        return datetime.datetime.strptime("01"+"01"+str(date_inputted.year),'%d%m%Y')
+    else:
+        return date
 
 def main():
     api = get_calendar_api()
-    time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time   
-    # run_calendar(api)
-    time_past="2017-10-10T09:26:52.171919Z"
-    print((get_past_events(api,time_past)))
+    run_calendar(api)
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     try:main()
     except KeyboardInterrupt:
