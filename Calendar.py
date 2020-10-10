@@ -16,6 +16,7 @@
 # Code adapted from https://developers.google.com/calendar/quickstart/python
 from __future__ import print_function
 import datetime
+from datetime import date
 import pickle
 import os.path
 from time import strptime
@@ -72,7 +73,7 @@ def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat(
     result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start+"\n"
+        results += event.get('summary',"No title") + "," + start+"\n"
     return results
 
     # Add your methods here.
@@ -99,7 +100,7 @@ def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isof
     result = events_result.get('items', [])
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start +"\n"
+        results += event.get('summary',"No title") + "," + start +"\n"
     return results
 
 
@@ -123,10 +124,10 @@ def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().i
     events = events_result.get('items', [])
     for event in events:
         if event['reminders'].get("useDefault") == True:
-            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+            reminders += event.get('summary',"No title") + "," + "Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides", []):
-                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                reminders += event.get('summary',"No title") + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
     return reminders
@@ -148,10 +149,10 @@ def get_upcoming_reminders(api, starting_time=datetime.datetime.utcnow().isoform
     events = events_result.get('items', [])
     for event in events:
         if event['reminders'].get("useDefault") == True:
-            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+            reminders += event.get('summary',"No title") + "," + "Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides", []):
-                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                reminders += event.get('summary',"No title") + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
     return reminders
@@ -201,7 +202,7 @@ def navigate_calendar(api,date,navigation_type):
 
 def get_detailed_event(event):
     detailed_description=""
-    if event.get("summary")==None: #None means no key for event title, subsequent event data cannnot be retrieved
+    if event.get("start")==None: #None means no key for event start time, subsequent event data cannnot be retrieved
         raise ValueError("Wrong argument passed into")
     #NOTE:
     #if parameter passed in is of other type, Attribute Errors will be raised
@@ -289,66 +290,111 @@ def delete_reminders(api, eventID):
 
 
 
+# def run_calendar(api):
+#     print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
+#     print("Commands available:")
+#     directives = ['upcoming', 'past', 'search', 'delete', 'date', 'month', 'year',"day","help"]
+#     for command in directives:
+#         print(command)
+#     print("\n")
+#     selected = None
+
+
+#     while True:
+#         command = input("command>").split(" ")
+#         n = len(command)
+#         results = ""
+
+#         if not n:
+#             continue
+
+#         directive = command[0]
+
+#         if directive == 'upcoming':
+
+#             if n > 1 and command[1] == '-r':
+#                 results = get_upcoming_reminders(api)
+#             else:
+#                 results = get_upcoming_events(api)
+
+#         elif directive == 'past':
+
+#             if n > 1 and command[1] == '-r':
+#                 results = get_past_reminders(api)
+#             else:
+#                 results = get_past_events(api)
+
+#         elif directive == 'search':
+
+#             if n > 2 and command[1] == '-r':
+#                 results = get_searched_reminders(api, command[2])
+#             elif n > 1:
+#                 results = get_searched_events(api, command[1])
+#             else:
+#                 print("No search keyword.")
+#                 continue
+
+#         elif directive == 'delete':
+
+#             if selected is None:
+#                 print("No events selected")
+#             elif n > 1 and command[1] == '-r':
+#                 if input("Delete reminders for selected event: " + selected['summary'] + "?").lower() == "y":
+#                     delete_reminders(api, selected['id'])
+#                     selected = None
+#                     print("Deleted reminders sucessfully")
+#             else:
+#                 if input("Delete selected event: " + selected['summary'] + "?").lower() == "y":
+#                     delete_events(api, selected['id'])
+#                     selected = None
+#                     print("Deleted event sucessfully")
+#             continue
+
+#         else:
+#             print("Invalid directive")
+#             continue
+
+#         selected = get_selected_event(results)
+
 def run_calendar(api):
     print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
-    directives = ['upcoming', 'past', 'search', 'delete', 'date', 'month', 'year']
-    selected = None
-
+    today=datetime.datetime.today().strftime('%Y-%m-%d')
+    print("Todays date(YY-MM-DD): "+today)
+    print("Commands available:")
+    directives = ['upcoming -e', 'past -e', 'search -e', 'delete -e',"upcoming -r","past -r","search -r",'delete -r', 
+                'date',"help","navigate","exit"]
+    for directive in directives:
+        print(directive)
+    print("-e is for events, while -r is for reminders")
+    print("\n")
     while True:
-        command = input("command>").split(" ")
-        n = len(command)
+        command = input("command>")
         results = ""
-
-        if not n:
+        if command not in directives:
+            print("Invalid command. Please try again!")
             continue
+        if command=="upcoming -e":
+            print(get_upcoming_events(api))
+        elif command=="upcoming -r":
+            print(get_upcoming_reminders(api))
+        elif command=="past -e":
+            while True:
+                try:
+                    past_date=input("Enter the date how long in the past in YYYY-MM-DD format only: ")
+                    date = datetime.datetime.strptime(past_date, "%Y-%m-%d").isoformat()+"000000Z"
+                    print(date)
+                    past_time = "2019-10-03T00:00:00.000000Z"
+                    print(get_past_events(api,past_time))
+                    break
+                except ValueError:
+                    print("Wrong format please try again")
 
-        directive = command[0]
 
-        if directive == 'upcoming':
 
-            if n > 1 and command[1] == '-r':
-                results = get_upcoming_reminders(api)
-            else:
-                results = get_upcoming_events_2(api)
 
-        elif directive == 'past':
 
-            if n > 1 and command[1] == '-r':
-                results = get_past_reminders(api)
-            else:
-                results = get_past_events(api)
+            
 
-        elif directive == 'search':
-
-            if n > 2 and command[1] == '-r':
-                results = get_searched_reminders(api, command[2])
-            elif n > 1:
-                results = get_searched_events(api, command[1])
-            else:
-                print("No search keyword.")
-                continue
-
-        elif directive == 'delete':
-
-            if selected is None:
-                print("No events selected")
-            elif n > 1 and command[1] == '-r':
-                if input("Delete reminders for selected event: " + selected['summary'] + "?").lower() == "y":
-                    delete_reminders(api, selected['id'])
-                    selected = None
-                    print("Deleted reminders sucessfully")
-            else:
-                if input("Delete selected event: " + selected['summary'] + "?").lower() == "y":
-                    delete_events(api, selected['id'])
-                    selected = None
-                    print("Deleted event sucessfully")
-            continue
-
-        else:
-            print("Invalid directive")
-            continue
-
-        selected = get_selected_event(results)
 
 
 def get_selected_event(results):
@@ -378,24 +424,11 @@ def get_selected_event(results):
 
 def main():
     api = get_calendar_api()
-    time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    past_time = "2019-09-25T09:59:04.501209Z"
-    events = get_upcoming_events(api, time_now, 10)
-    # if not events:
-    #     print('No upcoming events found.')
-    # for event in events:
-    #     start = event['start'].get('dateTime', event['start'].get('date'))
-    #     print(start, event['summary'])
+    time_now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time   
     # run_calendar(api)
-    # print("SEARCH EVENTS")
-    # print(get_searched_events(api, "hydrogen"))
-    # print("SEARCH REMINDERS")
-    # print(get_searched_reminders(api, "hydrogen"))
-
-    # print(delete_reminders(api,
-    #                        "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g8h1k2g9j6d1jegi275148dhg64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g8ksjie1h6gr42ghm74o3ce9k8gsjch246ks4ch9m68s3igph8p10")[
-    #           'reminders'])
-
-
+    time_past="2017-10-10T09:26:52.171919Z"
+    print((get_past_events(api,time_past)))
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
-    main()
+    try:main()
+    except KeyboardInterrupt:
+        pass
