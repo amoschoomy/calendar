@@ -38,4 +38,4 @@ This functionality is done through two methods, namely get_searched_events and g
 
 To test get_searched_events, we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch is the for loop (which may not run too!). We derived 4 test cases from here that help use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
 
-
+To test get_searched_reminders, we wil use branch coverage as well even though there are 4 visible branches, 2 of which are nested inside a for loop. The first 2 branch checks for invalid queries, and the last 2 branch are in the for loop (which may not run). To handle this we derived 5 test cases so that we can achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths are covered. 
