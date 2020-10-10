@@ -42,7 +42,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         ex_time = "January 1 2020"  # Date is of an invalid date so will throw Value Error
         mock_api = Mock()  # Mock api
         with self.assertRaises(ValueError):
-            Calendar.get_upcoming_events_2(mock_api, ex_time)
+            Calendar.get_upcoming_events(mock_api, ex_time)
 
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_events_valid_date(self, api):
@@ -51,7 +51,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
         """
 
         ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
-        events = Calendar.get_upcoming_events_2(api, ex_time)
+        events = Calendar.get_upcoming_events(api, ex_time)
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -67,7 +67,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
             ]}
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(Calendar.get_upcoming_events_2(api, ex_time), "test,2020-10-03T02:00:00.000000Z")
+        self.assertEqual(Calendar.get_upcoming_events(api, ex_time), "test,2020-10-03T02:00:00.000000Z\n")
 
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_events_non_empty_events(self, api):
@@ -86,10 +86,10 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
                 },
 
             ]}
-        upcoming_events = Calendar.get_upcoming_events_2(api, ex_time)
+        upcoming_events = Calendar.get_upcoming_events(api, ex_time)
         self.assertEqual(
             api.events.return_value.list.return_value.execute.call_count, 1)
-        self.assertEqual(upcoming_events, "test,2020-10-03T02:00:00.000000Z")
+        self.assertEqual(upcoming_events, "test,2020-10-03T02:00:00.000000Z\n")
 
 
 class CalendarTestGetUpcomingReminders(unittest.TestCase):
@@ -667,21 +667,7 @@ class CalendarTestGetDetailedEvent(unittest.TestCase):
 
     def test_get_detailed_event_raise_value_error(self):
         event = {
-            "start": {
-                "dateTime": "2020-06-10T02:00:00.000000Z"
-            },
-            "end": {
-                "dateTime": "2020-06-10T02:45:00.000000Z"
-            }, "reminders": {
-                'useDefault': True,
-                'overrides': [
-
-                ]
-            },
-            "status": "confirmed",
-            'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
-            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
-            'created': '2020-10-09T04:10:47.000Z',
+            'irrelevant':"nonsense"
 
         }
         with self.assertRaises(ValueError):
