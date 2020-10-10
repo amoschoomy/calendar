@@ -236,7 +236,7 @@ def get_searched_events(api, query):
         result = events.get('items', [])
         for event in result:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            results += event['summary'] + "," + start
+            results += event.get("summary", "No title") + "," + start
         return results
 
 def get_searched_reminders(api, query):
@@ -253,10 +253,10 @@ def get_searched_reminders(api, query):
         for event in result:
 
             if event['reminders'].get("useDefault") == True:
-                reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+                reminders += event.get("summary", "No title") + "," + "Reminder through popup 10 minutes before event starts"
             else:
                 for i in event["reminders"].get("overrides", []):
-                    reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                    reminders += event.get("summary", "No title") + "," + "Reminder through " + i.get("method") + " " + str(
                         i.get("minutes")) + " minutes before event starts"
             reminders += "\n"
 
