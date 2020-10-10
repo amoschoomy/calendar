@@ -31,3 +31,9 @@ Test case C: 3rd if statement passes, 2nd and 1st fails
 Test Case D: All if statement passes
 
 Overall there are 6 test cases for the method get_detailed_event
+
+
+**Miscalleanous**
+
+To test date_formatter method, just use branch coverage, there are 4 seperate branches to test, with hidden branch is when date given is wrong format.
+

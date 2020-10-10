@@ -308,8 +308,8 @@ def run_calendar(api):
     today=datetime.datetime.today().strftime('%Y-%m-%d')
     print("Todays date(YY-MM-DD): "+today)
     print("Commands available:")
-    directives = ['upcoming -e', 'past -e', 'search -e', 'delete -e',"upcoming -r","past -r","search -r",'delete -r', 
-                'date',"help","navigate","exit","exit nav"]
+    directives = ['upcoming -e', 'past -e', 'search -e',"upcoming -r","past -r","search -r",'delete -r', 
+                "help","navigate","exit"]
     for directive in directives:
         print(directive)
     print("-e is for events, while -r is for reminders")
@@ -352,9 +352,12 @@ def run_calendar(api):
         elif command=="delete -r":
             query=input("Input full name of the event of the reminder you'd like to delete")
             events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-            selected=get_selected_event(events.get('items', []))
-            delete_reminders(api,selected)
-            print("Deleted reminder succesfully")
+            try:
+                selected=get_selected_event(events.get('items', []))
+                delete_reminders(api,selected)
+                print("Deleted reminder succesfully")
+            except AttributeError:
+                print("No event selected")
 
         elif command=="navigate":
             nav_type=["MONTH","DAY","YEAR"]
@@ -372,17 +375,32 @@ def run_calendar(api):
                     if decision=="y":
                         event=input("Input full name of the event: ")
                         events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=event).execute()
-                        sole_event=get_selected_event(events.get('items', []))
-                        print(get_detailed_event(sole_event))
-                        des=input(("Delete? y/n \n"))
-                        if des=="y":
-                            delete_events(api,sole_event['id'])
-                            print("Deleted event sucessfully")
+                        try:
+                            sole_event=get_selected_event(events.get('items', []))
+                            print(get_detailed_event(sole_event))
+                            des=input(("Delete? y/n \n"))
+                            if des=="y":
+                                delete_events(api,sole_event['id'])
+                                print("Deleted event sucessfully")
+                                break
+                            else:break
+                        except AttributeError:
+                            print("Failure. No event selected")
                     else:
                         break
                 except ValueError:
                     print("Wrong input. Try again")
                     continue
+        elif command=="help":
+            print("Commands available:")
+            for directive in directives:
+                print(directive)
+            print("-e is for events, while -r is for reminders")
+            print("\n")
+            print("Contact devs at acho0057@student.monash.edu for further help")
+        elif command=="exit":
+            break
+
 
 
                 
@@ -416,9 +434,9 @@ def get_selected_event(results):
         print("Selected event: " + dict[index]['summary'])
 
     except ValueError:
-        print("No event selected")
+        pass
     except KeyError:
-        print("No event selected")
+        pass
 
     return userselect
 
@@ -428,7 +446,7 @@ def date_formatter(date_inputted,nav_type):
     elif nav_type=="YEAR":
         return datetime.datetime.strptime("01"+"01"+str(date_inputted.year),'%d%m%Y')
     else:
-        return date
+        return date_inputted
 
 def main():
     api = get_calendar_api()
