@@ -680,7 +680,7 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
         self.assertIn("popup 10", result)  # Assert reminder in result
 
     @patch("Calendar.get_calendar_api")
-    def test_navigate_calendar_path7_feb_28days(self, api):
+    def test_navigate_calendar_path7_feb_29days(self, api):
         date = datetime.strptime('Feb 29 2020  1:30AM', '%b %d %Y %I:%M%p')
         navigation_type = "MONTH"
         api.events.return_value.list.return_value.execute.return_value = {
