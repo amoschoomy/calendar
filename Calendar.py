@@ -230,13 +230,14 @@ def get_searched_events(api, query):
         raise TypeError
     elif query.strip() == "":
         raise ValueError
-    events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-    results = ""
-    result = events.get('items', [])
-    for event in result:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start
-    return results
+    else:
+        events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+        results = ""
+        result = events.get('items', [])
+        for event in result:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            results += event['summary'] + "," + start
+        return results
 
 def get_searched_reminders(api, query):
 
@@ -245,20 +246,21 @@ def get_searched_reminders(api, query):
     elif query.strip() == "":
         raise ValueError
 
-    reminders = ""
-    events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-    result = events.get('items', [])
-    for event in result:
+    else:
+        reminders = ""
+        events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
+        result = events.get('items', [])
+        for event in result:
 
-        if event['reminders'].get("useDefault") == True:
-            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
-        else:
-            for i in event["reminders"].get("overrides", []):
-                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
-                    i.get("minutes")) + " minutes before event starts"
-        reminders += "\n"
+            if event['reminders'].get("useDefault") == True:
+                reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+            else:
+                for i in event["reminders"].get("overrides", []):
+                    reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                        i.get("minutes")) + " minutes before event starts"
+            reminders += "\n"
 
-    return reminders
+        return reminders
 
 
 def delete_events(api, eventID):
@@ -387,14 +389,7 @@ def main():
     #     start = event['start'].get('dateTime', event['start'].get('date'))
     #     print(start, event['summary'])
     # run_calendar(api)
-    # print("SEARCH EVENTS")
-    # print(get_searched_events(api, "hydrogen"))
-    # print("SEARCH REMINDERS")
-    # print(get_searched_reminders(api, "hydrogen"))
 
-    # print(delete_reminders(api,
-    #                        "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g8h1k2g9j6d1jegi275148dhg64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g8ksjie1h6gr42ghm74o3ce9k8gsjch246ks4ch9m68s3igph8p10")[
-    #           'reminders'])
 
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner

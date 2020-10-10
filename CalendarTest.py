@@ -1006,6 +1006,7 @@ class CalendarTestDeleteReminders(unittest.TestCase):
         self.assertEqual(api.events.return_value.update.return_value.execute.call_count, 1)
         self.assertTrue(result)
 
+
 def main():
     # Create the test suite from the cases above.
     test_classes = [CalendarTestGetUpcomingEvents, CalendarTestGetUpcomingReminders,

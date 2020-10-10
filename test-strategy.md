@@ -31,3 +31,11 @@ Test case C: 3rd if statement passes, 2nd and 1st fails
 Test Case D: All if statement passes
 
 Overall there are 6 test cases for the method get_detailed_event
+
+**Strategy for Searching Events, Reminders** 
+
+This functionality is done through two methods, namely get_searched_events and get_searched_reminders methods, we will test these methods. 
+
+To test get_searched_events, we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch is the for loop (which may not run too!). We derived 4 test cases from here that help use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
+
+
