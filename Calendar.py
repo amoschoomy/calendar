@@ -262,16 +262,31 @@ def get_searched_reminders(api, query):
 
 
 def delete_events(api, eventID):
-    api.events().delete(calendarId='primary', eventId=eventID).execute()
+
+    if eventID is None:
+        raise TypeError
+    elif eventID.strip() == "":
+        raise ValueError
+    else:
+        api.events().delete(calendarId='primary', eventId=eventID).execute()
 
 
 def delete_reminders(api, eventID):
-    event = api.events().get(calendarId='primary', eventId=eventID).execute()
 
-    event['reminders'] = {"useDefault": False,
-                          "overrides": []}
+    if eventID is None:
+        raise TypeError
+    elif eventID.strip() == "":
+        raise ValueError
+    else:
+        event = api.events().get(calendarId='primary', eventId=eventID).execute()
 
-    return api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+        event['reminders'] = {"useDefault": False, "overrides": []}
+
+        retval = api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+
+        return len(retval['reminders'].get('overrides', [])) == 0
+
+
 
 
 def run_calendar(api):
