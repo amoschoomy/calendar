@@ -949,6 +949,42 @@ class TestDeleteEvents(unittest.TestCase):
         self.assertEqual(api.events.return_value.delete.return_value.execute.call_count, 1)
 
 
+class TestDeleteReminders(unittest.TestCase):
+
+    def test_none_event_id(self, api):
+        event_id = None
+        with self.assertRaises(TypeError):
+            Calendar.delete_reminders(api, event_id)
+
+    def test_empty_event_id(self, api):
+        event_id = " "
+        with self.assertRaises(ValueError):
+            Calendar.delete_reminders(api, event_id)
+
+        event_id = ""
+        with self.assertRaises(ValueError):
+            Calendar.delete_reminders(api, event_id)
+
+    def test_reminder_deleted(self):
+        event_id = "test123"
+
+        api = Mock()
+        api.events.return_value.get.return_value.execute.return_value = {
+            'id': event_id,
+            'reminders': {"useDefault": False, "overrides": [
+                            {'method': 'email', 'minutes': 1},
+                            {'method': 'popup', 'minutes': 10},
+                        ]}
+        }
+        api.events.return_value.update.return_value.execute.return_value ={
+            'id': event_id,
+            'reminders': {"useDefault": False, "overrides": []}
+        }
+
+        result = Calendar.delete_reminders(api, event_id)
+        self.assertEqual(api.events.return_value.get.return_value.execute.call_count, 1)
+        self.assertEqual(api.events.return_value.update.return_value.execute.call_count, 1)
+        self.assertTrue(result)
 
 def main():
     # Create the test suite from the cases above.
