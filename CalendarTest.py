@@ -808,13 +808,14 @@ class CalendarTestGetDetailedEvent(unittest.TestCase):
 
 
 class CalenderTestSearchEvents(unittest.TestCase):
-
+    @patch("Calendar.get_calendar_api")
     def test_none_event_query(self, api):
         query = None
 
         with self.assertRaises(TypeError):
             Calendar.get_searched_events(api, query)
 
+    @patch("Calendar.get_calendar_api")
     def test_empty_event_query(self, api):
         query = ""
 
@@ -843,11 +844,23 @@ class CalenderTestSearchEvents(unittest.TestCase):
             "items": [
                 {
                     "summary": query,
-                    "description": "ok"
+                    "description": "ok",
+                    "start": {
+                        "dateTime": "2020-06-10T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-06-10T02:45:00.000000Z"
+                    },
                 },
                 {
                     "summary": "Hello World",
-                    "description": query
+                    "description": query,
+                    "start": {
+                        "dateTime": "2020-06-10T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-06-10T02:45:00.000000Z"
+                    },
                 },
             ]}
 
@@ -856,14 +869,16 @@ class CalenderTestSearchEvents(unittest.TestCase):
         self.assertIn(query, searched_events)
 
 
-class TestSearchReminders(unittest.TestCase):
+class CalenderTestSearchReminders(unittest.TestCase):
 
+    @patch("Calendar.get_calendar_api")
     def test_none_reminder_query(self, api):
         query = None
 
         with self.assertRaises(TypeError):
             Calendar.get_searched_reminders(api, query)
 
+    @patch("Calendar.get_calendar_api")
     def test_empty_reminder_query(self, api):
         query = ""
 
@@ -901,7 +916,7 @@ class TestSearchReminders(unittest.TestCase):
                 },
             ]}
 
-        reminders = Calendar.get_upcoming_reminders(api, query)
+        reminders = Calendar.get_searched_reminders(api, query)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertIn("email 1", reminders)
         self.assertIn("popup 10", reminders)
@@ -925,13 +940,15 @@ class TestSearchReminders(unittest.TestCase):
         self.assertEqual(reminders, query + ",Reminder through popup 10 minutes before event starts\n")
 
 
-class TestDeleteEvents(unittest.TestCase):
+class CalendarTestDeleteEvents(unittest.TestCase):
 
+    @patch("Calendar.get_calendar_api")
     def test_none_event_id(self, api):
         event_id = None
         with self.assertRaises(TypeError):
             Calendar.delete_events(api, event_id)
 
+    @patch("Calendar.get_calendar_api")
     def test_empty_event_id(self, api):
         event_id = " "
         with self.assertRaises(ValueError):
@@ -949,13 +966,15 @@ class TestDeleteEvents(unittest.TestCase):
         self.assertEqual(api.events.return_value.delete.return_value.execute.call_count, 1)
 
 
-class TestDeleteReminders(unittest.TestCase):
+class CalendarTestDeleteReminders(unittest.TestCase):
 
+    @patch("Calendar.get_calendar_api")
     def test_none_event_id(self, api):
         event_id = None
         with self.assertRaises(TypeError):
             Calendar.delete_reminders(api, event_id)
 
+    @patch("Calendar.get_calendar_api")
     def test_empty_event_id(self, api):
         event_id = " "
         with self.assertRaises(ValueError):
@@ -978,7 +997,8 @@ class TestDeleteReminders(unittest.TestCase):
         }
         api.events.return_value.update.return_value.execute.return_value ={
             'id': event_id,
-            'reminders': {"useDefault": False, "overrides": []}
+            'reminders': {"useDefault": False, "overrides": []},
+            'updated': "2020-10-10T23:20:50.52Z"
         }
 
         result = Calendar.delete_reminders(api, event_id)
@@ -991,7 +1011,9 @@ def main():
     test_classes = [CalendarTestGetUpcomingEvents, CalendarTestGetUpcomingReminders,
                     CalendarTestGetPastReminders, CalendarTestNavigateCalendar,
                     CalendarTestGetDetailedEvent,
-                    CalendarTestGetPastEvents]  # Test Classes
+                    CalendarTestGetPastEvents, CalenderTestSearchEvents,
+                    CalenderTestSearchReminders, CalendarTestDeleteEvents,
+                    CalendarTestDeleteReminders]  # Test Classes
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.

@@ -284,7 +284,7 @@ def delete_reminders(api, eventID):
 
         retval = api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
 
-        return len(retval['reminders'].get('overrides', [])) == 0
+        return retval.get('updated', None)
 
 
 
