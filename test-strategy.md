@@ -1,5 +1,7 @@
 # Test Strategy for Functionalties of Calendar.py
 
+Note: This test suite assumes that the Google Calendar API is thoroughly tested  and does not contian any bugs/errors
+
 **Strategy for Viewing Upcoming Events**
 
 This functionality is done through the get_upcoming_events method therefore we will test that method.
@@ -45,3 +47,5 @@ To test get_searched_reminders(), we wil use branch coverage as well even though
 This functionality is done through two methods, namely delete_events() and delete_reminders() methods, we will test these methods. 
 
 To test delete_events(), we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch calls the api delete() function. We derived 3 test cases from here that helps use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
+
+To test delete_reminders(), we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch calls the api get() and update() function. We derived 3 test cases from here that helps use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
