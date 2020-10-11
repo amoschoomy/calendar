@@ -20,6 +20,8 @@ This functionalities is done through get_upcoming_reminders method and get_past_
 
 This functionality is done through two methods, the first being navigate_calendar where the user chooses which navigation type to view and reminders and events will be displayed. To test this method, path coverage is used to cover all possible paths in this method, there are 6 possible path in this method 2^1+2^1+1+1.
 
+Test for get_detailed_reminder will be similar to get_upcoming_reminders but only for one specific event
+
 The second method is get_detailed_event where it returns a string of detailed event selected.To test this method, MC/DC coverage is used to reduce the number of redundant test cases.
 
 2 test cases are needed to check for errors raised, that will change(stop) the program flow

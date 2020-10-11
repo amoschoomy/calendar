@@ -303,6 +303,22 @@ def delete_reminders(api, eventID):
 
         return retval.get('updated', None)
 
+def get_detailed_reminders(event):
+    detailed_description=""
+    if event.get("start")==None: #None means no key for event start time, subsequent event data cannnot be retrieved
+        raise ValueError("Wrong argument passed into")
+    #NOTE:
+    #if parameter passed in is of other type, Attribute Errors will be raised
+    if event['reminders'].get("useDefault") == True:
+        detailed_description += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+    else:
+        for i in event["reminders"].get("overrides", []):
+            detailed_description += event.get('summary','No title') + "," + "Reminder through " + i.get("method") + " " + str(
+                i.get("minutes")) + " minutes before event starts"
+    detailed_description += "\n"
+    return detailed_description
+
+
 def run_calendar(api):
     print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
     today=datetime.datetime.today().strftime('%Y-%m-%d')
@@ -378,6 +394,9 @@ def run_calendar(api):
                         try:
                             sole_event=get_selected_event(events.get('items', []))
                             print(get_detailed_event(sole_event))
+                            print(get_detailed_reminders(sole_event))
+                            #NOTE to dev, menu CLI will be updated if specific reminders can be deleted
+                            # right now  user can only delete whole event when they view event but not reminders here
                             des=input(("Delete? y/n \n"))
                             if des=="y":
                                 delete_events(api,sole_event['id'])
