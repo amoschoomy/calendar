@@ -345,7 +345,6 @@ def run_calendar(api):
                 try:
                     past_date=input("Enter the date how long in the past in YYYY-MM-DD format only: ")
                     date = datetime.datetime.strptime(past_date, "%Y-%m-%d").isoformat()+".000000Z"
-                    print(date)
                     print(get_past_events(api,date))
                     break
                 except ValueError:
