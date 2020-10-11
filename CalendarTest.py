@@ -6,33 +6,6 @@ import Calendar
 
 
 # Add other imports here if needed
-
-class CalendarTest(unittest.TestCase):
-    # This test tests number of upcoming events.
-    def test_get_upcoming_events_number(self):
-        num_events = 2
-        time = "2020-08-03T00:00:00.000000Z"
-
-        mock_api = Mock()
-        events = Calendar.get_upcoming_events(mock_api, time, num_events)
-
-        self.assertEqual(
-            mock_api.events.return_value.list.return_value.execute.return_value.get.call_count, 1)
-
-        args, kwargs = mock_api.events.return_value.list.call_args_list[0]
-        self.assertEqual(kwargs['maxResults'], num_events)
-
-    # Add more test cases here
-    # This test tests for assertion error raised if number of events
-    def test_get_upcoming_events_negative_number(self):
-        num_events = -1
-        ex_time = "2020-08-03T00:00:00.000000Z"
-
-        mock_api = Mock()
-        with self.assertRaises(ValueError):
-            Calendar.get_upcoming_events(mock_api, ex_time, num_events)
-
-
 class CalendarTestGetUpcomingEvents(unittest.TestCase):
     # Test Suite for User Story 1
 
@@ -662,6 +635,93 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
         self.assertIn("Birthday Party", result)  # Assert title in result
         self.assertIn("popup 10", result)  # Assert reminder in result
 
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path7_feb_28days(self, api):
+        date = datetime.strptime('Feb 28 2017  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type = "MONTH"
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "test",
+                    "start": {
+                        "dateTime": "2017-02-10T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2017-02-11T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': True,
+                    'overrides': [
+
+                    ]
+                },
+                },
+                {
+                    "summary": "Birthday Party",
+                    "start": {
+                        "dateTime": "2017-02-30T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2017-02-30T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': True,
+                    'overrides': [
+
+                    ]
+                },
+                },
+
+            ]}
+        result = Calendar.navigate_calendar(api, date, navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2)  # Mock method called twice
+        # First in getting events, second in getting reminders
+        self.assertIn("test", result)  # Assert title in result
+        self.assertIn("Birthday Party", result)  # Assert title in result
+        self.assertIn("popup 10", result)  # Assert reminder in result
+
+    @patch("Calendar.get_calendar_api")
+    def test_navigate_calendar_path7_feb_29days(self, api):
+        date = datetime.strptime('Feb 29 2020  1:30AM', '%b %d %Y %I:%M%p')
+        navigation_type = "MONTH"
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "test",
+                    "start": {
+                        "dateTime": "2017-02-10T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2017-02-11T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': True,
+                    'overrides': [
+
+                    ]
+                },
+                },
+                {
+                    "summary": "Birthday Party",
+                    "start": {
+                        "dateTime": "2017-02-30T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2017-02-30T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': True,
+                    'overrides': [
+
+                    ]
+                },
+                },
+
+            ]}
+        result = Calendar.navigate_calendar(api, date, navigation_type)
+        self.assertEqual(
+            api.events.return_value.list.return_value.execute.call_count, 2)  # Mock method called twice
+        # First in getting events, second in getting reminders
+        self.assertIn("test", result)  # Assert title in result
+        self.assertIn("Birthday Party", result)  # Assert title in result
+        self.assertIn("popup 10", result)  # Assert reminder in result
 
 class CalendarTestGetDetailedEvent(unittest.TestCase):
 
@@ -992,6 +1052,38 @@ class CalendarTestDeleteReminders(unittest.TestCase):
         self.assertEqual(api.events.return_value.update.return_value.execute.call_count, 1)
         self.assertTrue(result)
 
+class CalendarTestDateFormatter(unittest.TestCase):
+    def test_date_formatter_invalid_date(self):
+        date="15 October 2020"
+        nav_type="MONTH"
+        with self.assertRaises(AttributeError):
+            Calendar.date_formatter(date,nav_type)
+
+    def test_date_formatter_month(self):
+        date="15 October 2020"
+        date_inputted = datetime.strptime(date, '%d %B %Y')
+        nav_type="MONTH"
+        formatted_date="2020-10-01 00:00:00"
+        self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
+
+    def test_date_formatter_year(self):
+        date="15 October 2020"
+        date_inputted = datetime.strptime(date, '%d %B %Y')
+        nav_type="YEAR"
+        formatted_date="2020-01-01 00:00:00"
+        self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
+
+    def test_date_formatter_no_change(self):
+        date="15 October 2020"
+        date_inputted = datetime.strptime(date, '%d %B %Y')
+        nav_type="DAY"
+        formatted_date="2020-10-15 00:00:00"
+        self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
+
+
+
+
+
 
 def main():
     # Create the test suite from the cases above.
@@ -1000,7 +1092,7 @@ def main():
                     CalendarTestGetDetailedEvent,
                     CalendarTestGetPastEvents, CalenderTestSearchEvents,
                     CalenderTestSearchReminders, CalendarTestDeleteEvents,
-                    CalendarTestDeleteReminders]  # Test Classes
+                    CalendarTestDeleteReminders, CalendarTestDateFormatter]  # Test Classes
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.
