@@ -335,7 +335,7 @@ def run_calendar(api):
     today = datetime.datetime.today().strftime('%Y-%m-%d')
     print("Todays date(YY-MM-DD): " + today)
     print("Commands available:")
-    directives = ['upcoming -e', 'past -e', 'search -e', "upcoming -r", "past -r", "search -r", 'delete -r',
+    directives = ['upcoming -e', 'past -e', 'search -e', "upcoming -r", "past -r", "search -r",
                   "help", "navigate", "exit"]
     for directive in directives:
         print(directive)
@@ -375,25 +375,6 @@ def run_calendar(api):
             query = input("Enter search query: ")
             print(get_searched_reminders(api, query))
 
-        elif command == "delete -e'":
-            query = input("Input name of the event you'd like to delete")
-            events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-            try:
-                selected = get_selected_event(events.get('items', []))
-                delete_events(api, selected)
-                print("Deleted reminder succesfully")
-            except AttributeError:
-                print("No event selected")
-
-        elif command == "delete -r":
-            query = input("Input name of the event which reminders you'd like to delete")
-            events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-            try:
-                selected = get_selected_event(events.get('items', []))
-                delete_reminders(api, selected)
-                print("Deleted reminder succesfully")
-            except AttributeError:
-                print("No event selected")
 
         elif command == "navigate":
             nav_type = ["MONTH", "DAY", "YEAR"]
@@ -536,4 +517,6 @@ def main():
 
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
-    main()
+    try:main()
+    except KeyboardInterrupt:
+        pass
