@@ -380,12 +380,12 @@ def run_calendar(api):
         elif command == "navigate":
             nav_type = ["MONTH", "DAY", "YEAR"]
             while True:
-                print("Choose navigation type: ")
+                print("Navigate calender by : ")
                 for i in range(len(nav_type)):
                     print(str(i) + ": " + nav_type[i])
                 try:
                     nav = int(input())
-                    if nav != 0 and nav != 1 and nav != 2:
+                    if not (nav in [0,1,2]):
                         raise ValueError
                     nav_date = input("Enter date of navigation in DD M YYYY where M is the month name in full format: ")
                     date_inputted = datetime.datetime.strptime(nav_date, '%d %B %Y')
@@ -477,7 +477,7 @@ def get_selected_reminders(event):
 
     selected = None
     try:
-        index = int(input("Select an event: "))
+        index = int(input("Select a reminder to delete: "))
         userselect = dict[index]
         if userselect is not None:
             selected = index

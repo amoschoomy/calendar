@@ -1032,7 +1032,7 @@ class CalendarTestDeleteReminders(unittest.TestCase):
             Calendar.delete_reminders(api, event, None)
 
     @patch("Calendar.get_calendar_api")
-    def test_reminder_index_out_of_counds(self, api):
+    def test_reminder_index_out_of_bounds(self, api):
         event = {
             'id': "test123",
             'reminders': {"useDefault": False, "overrides": [
