@@ -76,7 +76,6 @@ def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat(
         results += event.get('summary',"No title") + "," + start + "\n"
     return results
 
-    # Add your methods here.
 
 
 def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
@@ -253,7 +252,6 @@ def get_searched_events(api, query):
         events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
         results = ""
         result = events.get('items', [])
-        return result
 
         for event in result:
             start = event['start'].get('dateTime', event['start'].get('date'))
@@ -308,7 +306,7 @@ def delete_reminders(api, event, reminder_index=-1):
         event['reminders'] = {"useDefault": False, "overrides": []}
         retval = api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
         return retval.get('updated', None)
-    elif reminder_index >= reminders.length:
+    elif reminder_index >= len(reminders):
         raise IndexError
     else:
         event["reminders"]["overrides"].pop(reminder_index)
@@ -397,7 +395,6 @@ def run_calendar(api):
             except AttributeError:
                 print("No event selected")
 
-
         elif command == "navigate":
             nav_type = ["MONTH", "DAY", "YEAR"]
             while True:
@@ -423,16 +420,17 @@ def run_calendar(api):
                             print(get_detailed_reminders(sole_event))
                             des = input("Enter 'del' to delete event, 'del -r' to delete reminders.").strip().lower()
                             if des == "del":
-                                delete_events(api, sole_event['id'])
+                                delete_events(api, sole_event)
                                 print("Deleted event sucessfully")
                                 break
                             elif des == "del -r":
                                 reminder_index = get_selected_reminders(sole_event)
                                 if reminder_index is not None:
-                                    delete_reminders(api, sole_event['id'], reminder_index)
+                                    delete_reminders(api, sole_event, reminder_index)
                                     print("Deleted reminder succesfully")
                                 break
                             else:
+                                print("No delete instruction, returning to calendar...")
                                 break
                         except AttributeError:
                             print("Failure. No event selected")
