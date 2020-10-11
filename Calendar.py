@@ -403,7 +403,7 @@ def run_calendar(api):
                             des = input("Enter 'del' to delete event, 'del -r' to delete reminders.").strip().lower()
                             if des == "del":
                                 delete_events(api, sole_event)
-                                print("Deleted event sucessfully")
+                                print("Deleted event successfully")
                                 break
                             elif des == "del -r":
                                 reminder_index = get_selected_reminders(sole_event)
@@ -468,7 +468,7 @@ def get_selected_reminders(event):
 
     overrides = reminderobj.get("overrides", [])
 
-    for i in range(overrides):
+    for i in range(len(overrides)):
         prompt += str(i) + ". Reminder through " + overrides[i].get("method") + " " + str(
             overrides[i].get("minutes")) + " minutes before event starts"
         dict[i] = overrides[i]
