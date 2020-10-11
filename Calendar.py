@@ -284,13 +284,13 @@ def get_searched_reminders(api, query):
         return reminders
 
 
-def delete_events(api, eventID):
-    if eventID is None:
+def delete_events(api, event):
+    if event is None:
         raise TypeError
-    elif not eventID.strip() == "":
+    elif not event.get("id", False):
         raise ValueError
     else:
-        api.events().delete(calendarId='primary', eventId=eventID).execute()
+        api.events().delete(calendarId='primary', eventId=event["id"]).execute()
 
 
 def delete_reminders(api, event, reminder_index=-1):
@@ -418,16 +418,17 @@ def run_calendar(api):
                             print(get_detailed_event(sole_event))
                             des = input("Enter 'del' to delete event, 'del -r' to delete reminders.").strip().lower()
                             if des == "del":
-                                delete_events(api, sole_event['id'])
+                                delete_events(api, sole_event)
                                 print("Deleted event sucessfully")
                                 break
                             elif des == "del -r":
                                 reminder_index = get_selected_reminders(sole_event)
                                 if reminder_index is not None:
-                                    delete_reminders(api, sole_event['id'], reminder_index)
+                                    delete_reminders(api, sole_event, reminder_index)
                                     print("Deleted reminder succesfully")
                                 break
                             else:
+                                print("No delete instruction, returning to calendar...")
                                 break
                         except AttributeError:
                             print("Failure. No event selected")
