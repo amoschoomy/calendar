@@ -73,7 +73,7 @@ def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat(
 
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start + "\n"
+        results += event.get('summary',"No title") + "," + start + "\n"
     return results
 
 
@@ -100,7 +100,7 @@ def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isof
 
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event['summary'] + "," + start + "\n"
+        results += event.get('summary',"No title") + "," + start + "\n"
     return results
 
 
@@ -124,10 +124,10 @@ def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().i
     events = events_result.get('items', [])
     for event in events:
         if event['reminders'].get("useDefault") == True:
-            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+            reminders += event.get('summary',"No title") + "," + "Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides", []):
-                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                reminders += event.get('summary',"No title") + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
     return reminders
@@ -149,10 +149,10 @@ def get_upcoming_reminders(api, starting_time=datetime.datetime.utcnow().isoform
     events = events_result.get('items', [])
     for event in events:
         if event['reminders'].get("useDefault") == True:
-            reminders += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+            reminders += event.get('summary',"No title") + "," + "Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides", []):
-                reminders += event["summary"] + "," + "Reminder through " + i.get("method") + " " + str(
+                reminders += event.get('summary',"No title") + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
     return reminders
@@ -223,7 +223,7 @@ def get_detailed_event(event):
         raise ValueError("Wrong argument passed into")
     # NOTE:
     # if parameter passed in is of other type, Attribute Errors will be raised
-    detailed_description += "Title: " + event['summary'] + "\n"
+    detailed_description += "Title: " +event.get('summary',"No title") + "\n"
 
     if event.get("visibility") is not None:
         detailed_description += "Visibility: " + event.get("visibility") + "\n"
@@ -356,7 +356,6 @@ def run_calendar(api):
                 try:
                     past_date = input("Enter the date how long in the past in YYYY-MM-DD format only: ")
                     date = datetime.datetime.strptime(past_date, "%Y-%m-%d").isoformat() + ".000000Z"
-                    print(date)
                     print(get_past_events(api, date))
                     break
                 except ValueError:
@@ -395,6 +394,8 @@ def run_calendar(api):
                     print(str(i) + ": " + nav_type[i])
                 try:
                     nav = int(input())
+                    if nav!=0 and nav!=1 and nav!=2:
+                        raise ValueError
                     nav_date = input("Enter date of navigation in DD M YYYY where M is the month name in full format: ")
                     date_inputted = datetime.datetime.strptime(nav_date, '%d %B %Y')
                     date = date_formatter(date_inputted, nav_type[nav])
@@ -407,6 +408,7 @@ def run_calendar(api):
                         try:
                             sole_event = get_selected_event(events.get('items', []))
                             print(get_detailed_event(sole_event))
+                            print(get_detailed_reminders(sole_event))
                             des = input("Enter 'del' to delete event, 'del -r' to delete reminders.").strip().lower()
                             if des == "del":
                                 delete_events(api, sole_event)
@@ -460,7 +462,7 @@ def get_selected_event(results):
         dict[event] = results[event]
 
         start = results[event]['start'].get('dateTime', results[event]['start'].get('date'))
-        prompt += str(event) + ": " + results[event]['summary'] + "," + start + "\n"
+        prompt += str(event) + ": " + results[event].get('summary',"No title") + "," + start + "\n"
     # if dict
     print(prompt)
 
@@ -468,7 +470,7 @@ def get_selected_event(results):
     try:
         index = int(input("Select an event: "))
         userselect = dict[index]
-        print("Selected event: " + dict[index]['summary'])
+        print("Selected event: " + dict[index].get('summary',"No title"))
 
     except ValueError:
         pass
