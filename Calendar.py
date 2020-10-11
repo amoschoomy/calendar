@@ -396,7 +396,6 @@ def run_calendar(api):
             except AttributeError:
                 print("No event selected")
 
-
         elif command == "navigate":
             nav_type = ["MONTH", "DAY", "YEAR"]
             while True:
