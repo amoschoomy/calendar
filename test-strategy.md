@@ -1,5 +1,7 @@
 # Test Strategy for Functionalties of Calendar.py
 
+Note: This test suite assumes that the Google Calendar API is thoroughly tested  and does not contian any bugs/errors
+
 **Strategy for Viewing Upcoming Events**
 
 This functionality is done through the get_upcoming_events method therefore we will test that method.
@@ -10,7 +12,7 @@ The whitebox technique we will use is branch coverage. There are two visible bra
 
 This functionality is done through get_past_events method therefore we will test that method.
 
-We will use the same technique which is branch coverage except now in this method which there is 3 branches. Values(date) selected in the test cases will be according to equivalence partitioning where every values in their respective partitions that follows the 3 conditions which is < , = , > will get the same result in blackbox testing. 
+We will use the same technique which is branch coverage except now in this method which there is 3 branches. Values(date) selected in the test cases will be according to equivalence partitioning where every values in their respective partitions that follows the 3 conditions which is < , = , > will get the same result in blackbox testing.
 
 **Strategy for Viewing Upcoming Reminders, Viewing Past Reminders**
 
@@ -35,7 +37,23 @@ Test Case D: All if statement passes
 Overall there are 6 test cases for the method get_detailed_event
 
 
+**Strategy for Searching Events, Reminders**
+
+This functionality is done through two methods, namely get_searched_events() and get_searched_reminders() methods, we will test these methods.
+
+To test get_searched_events(), we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch is the for loop (which may not run too!). We derived 4 test cases from here that help use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
+
+To test get_searched_reminders(), we wil use branch coverage as well even though there are 4 visible branches, 2 of which are nested inside a for loop. The first 2 branch checks for invalid queries, and the last 2 branch are in the for loop (which may not run). To handle this we derived 5 test cases so that we can achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths are covered.
+
+**Strategy for Deleting Events, Reminders**
+
+This functionality is done through two methods, namely delete_events() and delete_reminders() methods, we will test these methods.
+
+To test delete_events(), we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch calls the api delete() function. We derived 3 test cases from here that helps use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
+
+To test delete_reminders(), we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch calls the api get() and update() function. We derived 3 test cases from here that helps use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
+
+
 **Miscalleanous**
 
 To test date_formatter method, just use branch coverage, there are 4 seperate branches to test, with hidden branch is when date given is wrong format.
-

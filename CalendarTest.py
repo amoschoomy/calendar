@@ -1057,21 +1057,21 @@ class CalendarTestDateFormatter(unittest.TestCase):
         nav_type="MONTH"
         with self.assertRaises(AttributeError):
             Calendar.date_formatter(date,nav_type)
-    
+
     def test_date_formatter_month(self):
         date="15 October 2020"
         date_inputted = datetime.strptime(date, '%d %B %Y')
         nav_type="MONTH"
         formatted_date="2020-10-01 00:00:00"
         self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
-    
+
     def test_date_formatter_year(self):
         date="15 October 2020"
         date_inputted = datetime.strptime(date, '%d %B %Y')
         nav_type="YEAR"
         formatted_date="2020-01-01 00:00:00"
         self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
-    
+
     def test_date_formatter_no_change(self):
         date="15 October 2020"
         date_inputted = datetime.strptime(date, '%d %B %Y')
@@ -1079,7 +1079,7 @@ class CalendarTestDateFormatter(unittest.TestCase):
         formatted_date="2020-10-15 00:00:00"
         self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
 
-    
+
 class CalendarTestGetDetailedReminders(unittest.TestCase):
     def test_get_detailed_reminders_raise_value_error(self):
         event = {
@@ -1091,7 +1091,7 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
 
 
     def test_get_detailed_reminders_path2_two_custom_reminders(self):
-        
+
         event ={
                     "summary": "test",
                     "start": {
@@ -1106,13 +1106,13 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
                         {'method': 'popup', 'minutes': 10},
                     ], },
                 }
-        reminders = Calendar.get_detailed_reminders(event)        
+        reminders = Calendar.get_detailed_reminders(event)
         self.assertIn("email 1", reminders)
         self.assertIn("popup 10", reminders)
 
 
     def test_get_detailed_reminders_path3_no_reminder_set(self):
-    
+
         event = {
                     "summary": "test",
                     "start": {
@@ -1126,7 +1126,7 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
                     ], },
                 }
 
-            
+
         reminders = Calendar.get_detailed_reminders(event)
         self.assertEqual(reminders, "\n")  # A newline is returned due to the outer for loop being executed
 
@@ -1148,7 +1148,7 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
         reminders = Calendar.get_detailed_reminders(event)
         self.assertEqual(reminders, "test,Reminder through popup 10 minutes before event starts\n")
 
-    
+
 
 
 
