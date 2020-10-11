@@ -22,6 +22,7 @@ from time import strptime
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+import sys
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -317,6 +318,22 @@ def delete_reminders(api, event, reminder_index=-1):
         return retval.get('updated', None)
 
 
+def get_detailed_reminders(event):
+    detailed_description=""
+    if event.get("start")==None: #None means no key for event start time, subsequent event data cannnot be retrieved
+        raise ValueError("Wrong argument passed into")
+    #NOTE:
+    #if parameter passed in is of other type, Attribute Errors will be raised
+    if event['reminders'].get("useDefault") == True:
+        detailed_description += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
+    else:
+        for i in event["reminders"].get("overrides", []):
+            detailed_description += event.get('summary','No title') + "," + "Reminder through " + i.get("method") + " " + str(
+                i.get("minutes")) + " minutes before event starts"
+    detailed_description += "\n"
+    return detailed_description
+
+
 def run_calendar(api):
     print("Welcome to MLLMAOTEAM Google Calendar Viewer v1.0")
     today = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -434,56 +451,18 @@ def run_calendar(api):
         elif command == "exit":
             break
 
-        # if not n:
-        #     continue
-        #
-        # directive = command[0]
-        #
-        # if directive == 'upcoming':
-        #
-        #     if n > 1 and command[1] == '-r':
-        #         results = get_upcoming_reminders(api)
-        #     else:
-        #         results = get_upcoming_events_2(api)
-        #
-        # elif directive == 'past':
-        #
-        #     if n > 1 and command[1] == '-r':
-        #         results = get_past_reminders(api)
-        #     else:
-        #         results = get_past_events(api)
-        #
-        # elif directive == 'search':
-        #
-        #     if n > 2 and command[1] == '-r':
-        #         results = get_searched_reminders(api, command[2])
-        #     elif n > 1:
-        #         results = get_searched_events(api, command[1])
-        #     else:
-        #         print("No search keyword.")
-        #         continue
-        #
-        # elif directive == 'delete':
-        #
-        #     if selected is None:
-        #         print("No events selected")
-        #     elif n > 1 and command[1] == '-r':
-        #         if input("Delete reminders for selected event: " + selected['summary'] + "?").lower() == "y":
-        #             delete_reminders(api, selected['id'])
-        #             selected = None
-        #             print("Deleted reminders sucessfully")
-        #     else:
-        #         if input("Delete selected event: " + selected['summary'] + "?").lower() == "y":
-        #             delete_events(api, selected['id'])
-        #             selected = None
-        #             print("Deleted event sucessfully")
-        #     continue
-        #
-        # else:
-        #     print("Invalid directive")
-        #     continue
-        #
-        # selected = get_selected_event(results)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_selected_event(results):
