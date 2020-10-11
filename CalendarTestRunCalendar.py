@@ -24,6 +24,136 @@ class CalendarTestRunCalendar(unittest.TestCase):
         #Special string printed when user ask for help
         self.assertIn("Invalid command. Please try again!",mocked_output.getvalue())
     
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout',new_callable=StringIO)
+    @patch('Calendar.input', create=True)
+    def test_run_calendar_upcoming_events(self,mocked_input,mocked_output,api):
+        ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "Monash Exam",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    },
+                },
+
+            ]}
+        mocked_input.side_effect=["upcoming -e","exit"]
+        Calendar.run_calendar(api)
+        self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z",mocked_output.getvalue())
+    
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout',new_callable=StringIO)
+    @patch('Calendar.input', create=True)
+    def test_run_calendar_upcoming_reminders(self,mocked_input,mocked_output,api):
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "test",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 1},
+                        {'method': 'popup', 'minutes': 10},
+                    ], },
+                },
+
+            ]}
+        mocked_input.side_effect=["upcoming -r","exit"]
+        Calendar.run_calendar(api)
+        self.assertIn("popup 10",mocked_output.getvalue())
+        self.assertIn("email 1",mocked_output.getvalue())
+
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout',new_callable=StringIO)
+    @patch('Calendar.input', create=True)
+    def test_run_calendar_past_events(self,mocked_input,mocked_output,api):
+        ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "Monash Exam",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    },
+                },
+
+            ]}
+        mocked_input.side_effect=["past -e","2020-10-01","exit"]
+        Calendar.run_calendar(api)
+        self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z",mocked_output.getvalue())
+    
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout',new_callable=StringIO)
+    @patch('Calendar.input', create=True)
+    def test_run_calendar_past_reminders(self,mocked_input,mocked_output,api):
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "test",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 1},
+                        {'method': 'popup', 'minutes': 10},
+                    ], },
+                },
+
+            ]}
+        mocked_input.side_effect=["past -r","2020-10-01","exit"]
+        Calendar.run_calendar(api)
+        self.assertIn("email 1",mocked_output.getvalue())
+        self.assertIn("popup 10",mocked_output.getvalue())
+
+
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout',new_callable=StringIO)
+    @patch('Calendar.input', create=True)
+    def test_run_calendar_wrong_date_input(self,mocked_input,mocked_output,api):
+        #Wrong date input in getting events and reminder
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "test",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 1},
+                        {'method': 'popup', 'minutes': 10},
+                    ], },
+                },
+            ]}
+        mocked_input.side_effect=["past -r","2020-100-11","2020-10-01","past -e","20202-110-1","2020-10-01","exit"]
+        Calendar.run_calendar(api)
+        self.assertIn("Wrong format please try again",mocked_output.getvalue())
+
+
+        
+
+
+    
 def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(CalendarTestRunCalendar)
         # This will run the test suite.
