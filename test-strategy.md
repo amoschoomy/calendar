@@ -54,6 +54,8 @@ To test delete_events(), we will use branch coverage to test these methods since
 To test delete_reminders(), we will use branch coverage to test these methods since they are 3 visible branches, the first two checks for invalid queries and the last branch calls the api get() and update() function. We derived 3 test cases from here that helps use achieve 100% branch and statement coverage, it also guarantees 100% path coverage since all possible paths of execution are covered.
 
 
+**Test Strategy for Run_Calendar**
+This method uses user input so mocked input are needed to test. Branch coverage is used to cover all possible branches and therefore 100% branch coverage implies 100% statement coverage
 **Miscalleanous**
 
 To test date_formatter method, just use branch coverage, there are 4 seperate branches to test, with hidden branch is when date given is wrong format.
