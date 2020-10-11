@@ -14,7 +14,7 @@ class CalendarTestRunCalendar(unittest.TestCase):
         Calendar.run_calendar(api)
         #Special string printed when user ask for help
         self.assertIn("Contact devs at acho0057@student.monash.edu for further help",mocked_output.getvalue())
-    
+
     @patch("Calendar.get_calendar_api")
     @patch('sys.stdout',new_callable=StringIO)
     @patch('Calendar.input', create=True)
@@ -24,7 +24,7 @@ class CalendarTestRunCalendar(unittest.TestCase):
         
         #Printed in console so assert check
         self.assertIn("Invalid command. Please try again!",mocked_output.getvalue())
-    
+
     @patch("Calendar.get_calendar_api")
     @patch('sys.stdout',new_callable=StringIO)
     @patch('Calendar.input', create=True)
@@ -46,7 +46,7 @@ class CalendarTestRunCalendar(unittest.TestCase):
         mocked_input.side_effect=["upcoming -e","exit"]
         Calendar.run_calendar(api)
         self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z",mocked_output.getvalue())
-    
+
     @patch("Calendar.get_calendar_api")
     @patch('sys.stdout',new_callable=StringIO)
     @patch('Calendar.input', create=True)
@@ -94,7 +94,7 @@ class CalendarTestRunCalendar(unittest.TestCase):
         mocked_input.side_effect=["past -e","2020-10-10","exit"]
         Calendar.run_calendar(api)
         self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z",mocked_output.getvalue())
-    
+
     @patch("Calendar.get_calendar_api")
     @patch('sys.stdout',new_callable=StringIO)
     @patch('Calendar.input', create=True)
@@ -267,12 +267,31 @@ class CalendarTestRunCalendar(unittest.TestCase):
         Calendar.run_calendar(api)
         self.assertIn("Failure. No event selected",mocked_output.getvalue())
 
-      
+        @patch("Calendar.get_calendar_api")
+        @patch('sys.stdout', new_callable=StringIO)
+        @patch('Calendar.input', create=True)
+        def test_run_calendar_search_events(self, mocked_input, mocked_output, api):
+            ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
+            api.events.return_value.list.return_value.execute.return_value = {
+                "items": [
+                    {
+                        "summary": "Monash Exam",
+                        "start": {
+                            "dateTime": "2020-10-03T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-03T02:45:00.000000Z"
+                        },
+                    },
 
-        
+                ]}
+            mocked_input.side_effect = ["search -e","Monash Exam", "exit"]
+            Calendar.run_calendar(api)
+            self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z", mocked_output.getvalue())
 
 
-    
+
+
 def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(CalendarTestRunCalendar)
         # This will run the test suite.

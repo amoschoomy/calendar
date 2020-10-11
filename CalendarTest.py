@@ -722,11 +722,12 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
         self.assertIn("Birthday Party", result)  # Assert title in result
         self.assertIn("popup 10", result)  # Assert reminder in result
 
+
 class CalendarTestGetDetailedEvent(unittest.TestCase):
 
     def test_get_detailed_event_raise_value_error(self):
         event = {
-            'irrelevant':"nonsense"
+            'irrelevant': "nonsense"
 
         }
         with self.assertRaises(ValueError):
@@ -989,143 +990,171 @@ class CalendarTestDeleteEvents(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_none_event_id(self, api):
-        event_id = None
+        event = None
         with self.assertRaises(TypeError):
-            Calendar.delete_events(api, event_id)
+            Calendar.delete_events(api, event)
 
     @patch("Calendar.get_calendar_api")
     def test_empty_event_id(self, api):
-        event_id = " "
+        event = {}
         with self.assertRaises(ValueError):
-            Calendar.delete_events(api, event_id)
+            Calendar.delete_events(api, event)
 
-        event_id = ""
+        event = {}
         with self.assertRaises(ValueError):
-            Calendar.delete_events(api, event_id)
+            Calendar.delete_events(api, event)
 
     def test_events_deleted(self):
         api = Mock()
-
-        event_id = "test123"
-        Calendar.delete_events(api, event_id)
+        event = {"id": "test123"}
+        Calendar.delete_events(api, event)
         self.assertEqual(api.events.return_value.delete.return_value.execute.call_count, 1)
 
 
 class CalendarTestDeleteReminders(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
-    def test_none_event_id(self, api):
-        event_id = None
+    def test_none_event(self, api):
+        event = None
         with self.assertRaises(TypeError):
-            Calendar.delete_reminders(api, event_id)
+            Calendar.delete_reminders(api, event, -1)
 
     @patch("Calendar.get_calendar_api")
-    def test_empty_event_id(self, api):
-        event_id = " "
-        with self.assertRaises(ValueError):
-            Calendar.delete_reminders(api, event_id)
+    def test_none_reminder_index(self, api):
+        event = {
+            'id': "test123",
+            'reminders': {"useDefault": False, "overrides": [
+                {'method': 'email', 'minutes': 1},
+                {'method': 'popup', 'minutes': 10},
+            ]}
+        }
+        with self.assertRaises(TypeError):
+            Calendar.delete_reminders(api, event, None)
 
-        event_id = ""
-        with self.assertRaises(ValueError):
-            Calendar.delete_reminders(api, event_id)
+    @patch("Calendar.get_calendar_api")
+    def test_reminder_index_out_of_counds(self, api):
+        event = {
+            'id': "test123",
+            'reminders': {"useDefault": False, "overrides": [
+                {'method': 'email', 'minutes': 1},
+                {'method': 'popup', 'minutes': 10},
+            ]}
+        }
+
+        with self.assertRaises(IndexError):
+            Calendar.delete_reminders(api, event, 5)
+
 
     def test_reminder_deleted(self):
-        event_id = "test123"
+        event = {
+            'id': "test123",
+            'reminders': {"useDefault": False, "overrides": [
+                {'method': 'email', 'minutes': 1},
+                {'method': 'popup', 'minutes': 10},
+            ]}
+        }
 
         api = Mock()
-        api.events.return_value.get.return_value.execute.return_value = {
-            'id': event_id,
+        api.events.return_value.update.return_value.execute.return_value = {
+            'id': "test123",
             'reminders': {"useDefault": False, "overrides": [
-                            {'method': 'email', 'minutes': 1},
-                            {'method': 'popup', 'minutes': 10},
-                        ]}
+                {'method': 'email', 'minutes': 1}
+            ]},
+            'updated': "2020-10-10T23:20:50.52Z"
         }
-        api.events.return_value.update.return_value.execute.return_value ={
-            'id': event_id,
+
+        result = Calendar.delete_reminders(api, event, 1)
+        self.assertEqual(api.events.return_value.update.return_value.execute.call_count, 1)
+        self.assertTrue(result)
+
+    def test_reminder_deleted_default(self):
+        event = {
+            'id': "test123",
+            'reminders': {"useDefault": True, "overrides": []}
+        }
+
+        api = Mock()
+        api.events.return_value.update.return_value.execute.return_value = {
+            'id': "test123",
             'reminders': {"useDefault": False, "overrides": []},
             'updated': "2020-10-10T23:20:50.52Z"
         }
 
-        result = Calendar.delete_reminders(api, event_id)
-        self.assertEqual(api.events.return_value.get.return_value.execute.call_count, 1)
+        result = Calendar.delete_reminders(api, event)
         self.assertEqual(api.events.return_value.update.return_value.execute.call_count, 1)
         self.assertTrue(result)
 
+
 class CalendarTestDateFormatter(unittest.TestCase):
     def test_date_formatter_invalid_date(self):
-        date="15 October 2020"
-        nav_type="MONTH"
+        date = "15 October 2020"
+        nav_type = "MONTH"
         with self.assertRaises(AttributeError):
-            Calendar.date_formatter(date,nav_type)
+            Calendar.date_formatter(date, nav_type)
 
     def test_date_formatter_month(self):
-        date="15 October 2020"
+        date = "15 October 2020"
         date_inputted = datetime.strptime(date, '%d %B %Y')
-        nav_type="MONTH"
-        formatted_date="2020-10-01 00:00:00"
-        self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
+        nav_type = "MONTH"
+        formatted_date = "2020-10-01 00:00:00"
+        self.assertEqual(formatted_date, str(Calendar.date_formatter(date_inputted, nav_type)))
 
     def test_date_formatter_year(self):
-        date="15 October 2020"
+        date = "15 October 2020"
         date_inputted = datetime.strptime(date, '%d %B %Y')
-        nav_type="YEAR"
-        formatted_date="2020-01-01 00:00:00"
-        self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
+        nav_type = "YEAR"
+        formatted_date = "2020-01-01 00:00:00"
+        self.assertEqual(formatted_date, str(Calendar.date_formatter(date_inputted, nav_type)))
 
     def test_date_formatter_no_change(self):
-        date="15 October 2020"
+        date = "15 October 2020"
         date_inputted = datetime.strptime(date, '%d %B %Y')
-        nav_type="DAY"
-        formatted_date="2020-10-15 00:00:00"
-        self.assertEqual(formatted_date,str(Calendar.date_formatter(date_inputted,nav_type)))
+        nav_type = "DAY"
+        formatted_date = "2020-10-15 00:00:00"
+        self.assertEqual(formatted_date, str(Calendar.date_formatter(date_inputted, nav_type)))
 
 
 class CalendarTestGetDetailedReminders(unittest.TestCase):
     def test_get_detailed_reminders_raise_value_error(self):
         event = {
-            'irrelevant':"nonsense"
+            'irrelevant': "nonsense"
 
         }
         with self.assertRaises(ValueError):
             Calendar.get_detailed_reminders(event)
 
-
     def test_get_detailed_reminders_path2_two_custom_reminders(self):
-
-        event ={
-                    "summary": "test",
-                    "start": {
-                        "dateTime": "2020-10-03T02:00:00.000000Z"
-                    },
-                    "end": {
-                        "dateTime": "2020-10-03T02:45:00.000000Z"
-                    }, "reminders": {
-                    'useDefault': False,
-                    'overrides': [
-                        {'method': 'email', 'minutes': 1},
-                        {'method': 'popup', 'minutes': 10},
-                    ], },
-                }
+        event = {
+            "summary": "test",
+            "start": {
+                "dateTime": "2020-10-03T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-10-03T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': False,
+                'overrides': [
+                    {'method': 'email', 'minutes': 1},
+                    {'method': 'popup', 'minutes': 10},
+                ], },
+        }
         reminders = Calendar.get_detailed_reminders(event)
         self.assertIn("email 1", reminders)
         self.assertIn("popup 10", reminders)
 
-
     def test_get_detailed_reminders_path3_no_reminder_set(self):
-
         event = {
-                    "summary": "test",
-                    "start": {
-                        "dateTime": "2020-10-03T02:00:00.000000Z"
-                    },
-                    "end": {
-                        "dateTime": "2020-10-03T02:45:00.000000Z"
-                    }, "reminders": {
-                    'useDefault': False,
-                    'overrides': [
-                    ], },
-                }
-
+            "summary": "test",
+            "start": {
+                "dateTime": "2020-10-03T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-10-03T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': False,
+                'overrides': [
+                ], },
+        }
 
         reminders = Calendar.get_detailed_reminders(event)
         self.assertEqual(reminders, "\n")  # A newline is returned due to the outer for loop being executed
@@ -1134,22 +1163,19 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
         # Path 5 where if statement to check date validity succeeds, outer for loop is executed, and if
         # branch is executed which is default reminders
         event = {
-                    "summary": "test",
-                    "start": {
-                        "dateTime": "2020-10-03T02:00:00.000000Z"
-                    },
-                    "end": {
-                        "dateTime": "2020-10-03T02:45:00.000000Z"
-                    }, "reminders": {
-                    'useDefault': True,
-                    'overrides': [
-                    ], },
-                }
+            "summary": "test",
+            "start": {
+                "dateTime": "2020-10-03T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-10-03T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': True,
+                'overrides': [
+                ], },
+        }
         reminders = Calendar.get_detailed_reminders(event)
         self.assertEqual(reminders, "test,Reminder through popup 10 minutes before event starts\n")
-
-
-
 
 
 def main():
