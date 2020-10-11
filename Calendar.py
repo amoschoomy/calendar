@@ -310,7 +310,7 @@ def delete_reminders(api, event, reminder_index=-1):
         event['reminders'] = {"useDefault": False, "overrides": []}
         retval = api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
         return retval.get('updated', None)
-    elif reminder_index >= reminders.length:
+    elif reminder_index >= len(reminders):
         raise IndexError
     else:
         event["reminders"]["overrides"].pop(reminder_index)
