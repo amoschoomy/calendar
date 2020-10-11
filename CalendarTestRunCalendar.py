@@ -77,7 +77,6 @@ class CalendarTestRunCalendar(unittest.TestCase):
     @patch('sys.stdout',new_callable=StringIO)
     @patch('Calendar.input', create=True)
     def test_run_calendar_past_events(self,mocked_input,mocked_output,api):
-        ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -91,7 +90,7 @@ class CalendarTestRunCalendar(unittest.TestCase):
                 },
 
             ]}
-        mocked_input.side_effect=["past -e","2020-10-01","exit"]
+        mocked_input.side_effect=["past -e","2020-10-10","exit"]
         Calendar.run_calendar(api)
         self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z",mocked_output.getvalue())
     
@@ -148,7 +147,45 @@ class CalendarTestRunCalendar(unittest.TestCase):
         mocked_input.side_effect=["past -r","2020-100-11","2020-10-01","past -e","20202-110-1","2020-10-01","exit"]
         Calendar.run_calendar(api)
         self.assertIn("Wrong format please try again",mocked_output.getvalue())
+        
 
+    
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout',new_callable=StringIO)
+    @patch('Calendar.input', create=True)
+    def test_run_calendar_navigate_calendar_view_but_no_delete(self,mocked_input,mocked_output,api):
+        mocked_input.side_effect=["navigate","0","23 October 2020","y"," ","0","-","exit"]
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "COVID",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "status": "confirmed",
+                    'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                    'created': '2020-10-09T04:10:47.000Z',
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 1},
+                        {'method': 'popup', 'minutes': 10},
+                    ], },
+                },
+            ]}
+        Calendar.run_calendar(api)
+        self.assertIn("Status: confirmed",mocked_output.getvalue())#simple assertion check to test get_detailed_event been called
+        self.assertIn("email 1",mocked_output.getvalue()) #simple assertion check to test get_detailed_reminders been called
+        self.assertIn("popup 10",mocked_output.getvalue())
+    
+    # @patch("Calendar.get_calendar_api")
+    # @patch('sys.stdout',new_callable=StringIO)
+    # @patch('Calendar.input', create=True)
+    # def test_run_calendar_navigate_calendar_no_view(self,mocked_input,mocked_output,api):
+
+      
 
         
 
