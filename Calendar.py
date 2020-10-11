@@ -419,8 +419,7 @@ def run_calendar(api):
             print("\n")
             print("Contact devs at acho0057@student.monash.edu for further help")
         elif command=="exit":
-            sys.exit()
-
+            break
 
 
                 
