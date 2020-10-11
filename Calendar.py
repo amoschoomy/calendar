@@ -70,14 +70,12 @@ def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat(
                                       singleEvents=True,
                                       orderBy='startTime').execute()
     result = events_result.get('items', [])
-    return result
 
-    # for event in result:
-    #     start = event['start'].get('dateTime', event['start'].get('date'))
-    #     results += event['summary'] + "," + start + "\n"
-    # return results
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results += event['summary'] + "," + start + "\n"
+    return results
 
-    # Add your methods here.
 
 
 def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
@@ -99,12 +97,11 @@ def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isof
     events_result = api.events().list(calendarId='primary', timeMin=starting_time, timeMax=end_time, singleEvents=True,
                                       orderBy='startTime').execute()
     result = events_result.get('items', [])
-    return result
 
-    # for event in result:
-    #     start = event['start'].get('dateTime', event['start'].get('date'))
-    #     results += event['summary'] + "," + start + "\n"
-    # return results
+    for event in result:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        results += event['summary'] + "," + start + "\n"
+    return results
 
 
 def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
@@ -255,12 +252,11 @@ def get_searched_events(api, query):
         events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
         results = ""
         result = events.get('items', [])
-        return result
 
-        # for event in result:
-        #     start = event['start'].get('dateTime', event['start'].get('date'))
-        #     results += event.get("summary", "No title") + "," + start
-        # return results
+        for event in result:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            results += event.get("summary", "No title") + "," + start
+        return results
 
 
 def get_searched_reminders(api, query):
@@ -288,13 +284,13 @@ def get_searched_reminders(api, query):
         return reminders
 
 
-def delete_events(api, event):
-    if event is None:
+def delete_events(api, eventID):
+    if eventID is None:
         raise TypeError
-    elif not event.get("id", False):
+    elif not eventID.strip() == "":
         raise ValueError
     else:
-        api.events().delete(calendarId='primary', eventId=event["id"]).execute()
+        api.events().delete(calendarId='primary', eventId=eventID).execute()
 
 
 def delete_reminders(api, event, reminder_index=-1):
