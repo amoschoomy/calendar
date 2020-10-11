@@ -73,9 +73,8 @@ def get_upcoming_events(api, starting_time=datetime.datetime.utcnow().isoformat(
 
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event.get('summary',"No title") + "," + start + "\n"
+        results += event.get('summary', "No title") + "," + start + "\n"
     return results
-
 
 
 def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isoformat() + 'Z'):
@@ -100,7 +99,7 @@ def get_past_events(api, starting_time, end_time=datetime.datetime.utcnow().isof
 
     for event in result:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        results += event.get('summary',"No title") + "," + start + "\n"
+        results += event.get('summary', "No title") + "," + start + "\n"
     return results
 
 
@@ -124,10 +123,11 @@ def get_past_reminders(api, starting_time, end_time=datetime.datetime.utcnow().i
     events = events_result.get('items', [])
     for event in events:
         if event['reminders'].get("useDefault") == True:
-            reminders += event.get('summary',"No title") + "," + "Reminder through popup 10 minutes before event starts"
+            reminders += event.get('summary',
+                                   "No title") + "," + "Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides", []):
-                reminders += event.get('summary',"No title") + "," + "Reminder through " + i.get("method") + " " + str(
+                reminders += event.get('summary', "No title") + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
     return reminders
@@ -149,10 +149,11 @@ def get_upcoming_reminders(api, starting_time=datetime.datetime.utcnow().isoform
     events = events_result.get('items', [])
     for event in events:
         if event['reminders'].get("useDefault") == True:
-            reminders += event.get('summary',"No title") + "," + "Reminder through popup 10 minutes before event starts"
+            reminders += event.get('summary',
+                                   "No title") + "," + "Reminder through popup 10 minutes before event starts"
         else:
             for i in event["reminders"].get("overrides", []):
-                reminders += event.get('summary',"No title") + "," + "Reminder through " + i.get("method") + " " + str(
+                reminders += event.get('summary', "No title") + "," + "Reminder through " + i.get("method") + " " + str(
                     i.get("minutes")) + " minutes before event starts"
         reminders += "\n"
     return reminders
@@ -223,7 +224,7 @@ def get_detailed_event(event):
         raise ValueError("Wrong argument passed into")
     # NOTE:
     # if parameter passed in is of other type, Attribute Errors will be raised
-    detailed_description += "Title: " +event.get('summary',"No title") + "\n"
+    detailed_description += "Title: " + event.get('summary', "No title") + "\n"
 
     if event.get("visibility") is not None:
         detailed_description += "Visibility: " + event.get("visibility") + "\n"
@@ -297,13 +298,11 @@ def delete_events(api, event):
 def delete_reminders(api, event, reminder_index=-1):
     if event is None:
         raise TypeError
-    elif not event.get("id", False):
-        raise ValueError
     elif reminder_index is None:
         raise TypeError
 
-    reminders = event["reminders"].get("overrides",[])
-    if reminder_index == -1:
+    reminders = event["reminders"].get("overrides", [])
+    if event['reminders'].get("useDefault", False):
         event['reminders'] = {"useDefault": False, "overrides": []}
         retval = api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
         return retval.get('updated', None)
@@ -316,16 +315,17 @@ def delete_reminders(api, event, reminder_index=-1):
 
 
 def get_detailed_reminders(event):
-    detailed_description=""
-    if event.get("start")==None: #None means no key for event start time, subsequent event data cannnot be retrieved
+    detailed_description = ""
+    if event.get("start") == None:  # None means no key for event start time, subsequent event data cannnot be retrieved
         raise ValueError("Wrong argument passed into")
-    #NOTE:
-    #if parameter passed in is of other type, Attribute Errors will be raised
+    # NOTE:
+    # if parameter passed in is of other type, Attribute Errors will be raised
     if event['reminders'].get("useDefault") == True:
         detailed_description += event["summary"] + "," + "Reminder through popup 10 minutes before event starts"
     else:
         for i in event["reminders"].get("overrides", []):
-            detailed_description += event.get('summary','No title') + "," + "Reminder through " + i.get("method") + " " + str(
+            detailed_description += event.get('summary', 'No title') + "," + "Reminder through " + i.get(
+                "method") + " " + str(
                 i.get("minutes")) + " minutes before event starts"
     detailed_description += "\n"
     return detailed_description
@@ -394,7 +394,7 @@ def run_calendar(api):
                     print(str(i) + ": " + nav_type[i])
                 try:
                     nav = int(input())
-                    if nav!=0 and nav!=1 and nav!=2:
+                    if nav != 0 and nav != 1 and nav != 2:
                         raise ValueError
                     nav_date = input("Enter date of navigation in DD M YYYY where M is the month name in full format: ")
                     date_inputted = datetime.datetime.strptime(nav_date, '%d %B %Y')
@@ -441,19 +441,6 @@ def run_calendar(api):
             break
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 def get_selected_event(results):
     dict = {}
     prompt = ""
@@ -462,7 +449,7 @@ def get_selected_event(results):
         dict[event] = results[event]
 
         start = results[event]['start'].get('dateTime', results[event]['start'].get('date'))
-        prompt += str(event) + ": " + results[event].get('summary',"No title") + "," + start + "\n"
+        prompt += str(event) + ": " + results[event].get('summary', "No title") + "," + start + "\n"
     # if dict
     print(prompt)
 
@@ -470,7 +457,7 @@ def get_selected_event(results):
     try:
         index = int(input("Select an event: "))
         userselect = dict[index]
-        print("Selected event: " + dict[index].get('summary',"No title"))
+        print("Selected event: " + dict[index].get('summary', "No title"))
 
     except ValueError:
         pass
