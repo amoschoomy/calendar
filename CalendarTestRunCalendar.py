@@ -149,7 +149,27 @@ class CalendarTestRunCalendar(unittest.TestCase):
         Calendar.run_calendar(api)
         self.assertIn("Wrong format please try again",mocked_output.getvalue())
 
+        @patch("Calendar.get_calendar_api")
+        @patch('sys.stdout', new_callable=StringIO)
+        @patch('Calendar.input', create=True)
+        def test_run_calendar_search_events(self, mocked_input, mocked_output, api):
+            ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
+            api.events.return_value.list.return_value.execute.return_value = {
+                "items": [
+                    {
+                        "summary": "Monash Exam",
+                        "start": {
+                            "dateTime": "2020-10-03T02:00:00.000000Z"
+                        },
+                        "end": {
+                            "dateTime": "2020-10-03T02:45:00.000000Z"
+                        },
+                    },
 
+                ]}
+            mocked_input.side_effect = ["search -e","Monash Exam", "exit"]
+            Calendar.run_calendar(api)
+            self.assertIn("Monash Exam,2020-10-03T02:00:00.000000Z", mocked_output.getvalue())
         
 
 

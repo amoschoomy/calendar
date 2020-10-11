@@ -989,25 +989,24 @@ class CalendarTestDeleteEvents(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_none_event_id(self, api):
-        event_id = None
+        event = None
         with self.assertRaises(TypeError):
-            Calendar.delete_events(api, event_id)
+            Calendar.delete_events(api, event)
 
     @patch("Calendar.get_calendar_api")
     def test_empty_event_id(self, api):
-        event_id = " "
+        event = {}
         with self.assertRaises(ValueError):
-            Calendar.delete_events(api, event_id)
+            Calendar.delete_events(api, event)
 
-        event_id = ""
+        event = {}
         with self.assertRaises(ValueError):
-            Calendar.delete_events(api, event_id)
+            Calendar.delete_events(api, event)
 
     def test_events_deleted(self):
         api = Mock()
-
-        event_id = "test123"
-        Calendar.delete_events(api, event_id)
+        event = { "id" : "test123" }
+        Calendar.delete_events(api, event)
         self.assertEqual(api.events.return_value.delete.return_value.execute.call_count, 1)
 
 
@@ -1015,9 +1014,9 @@ class CalendarTestDeleteReminders(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_none_event_id(self, api):
-        event_id = None
+        event = None
         with self.assertRaises(TypeError):
-            Calendar.delete_reminders(api, event_id)
+            Calendar.delete_reminders(api, event)
 
     @patch("Calendar.get_calendar_api")
     def test_empty_event_id(self, api):

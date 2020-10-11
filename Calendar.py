@@ -256,6 +256,7 @@ def get_searched_events(api, query):
         for event in result:
             start = event['start'].get('dateTime', event['start'].get('date'))
             results += event.get("summary", "No title") + "," + start
+            results += "\n"
         return results
 
 
@@ -382,16 +383,6 @@ def run_calendar(api):
             try:
                 selected = get_selected_event(events.get('items', []))
                 delete_events(api, selected)
-                print("Deleted reminder succesfully")
-            except AttributeError:
-                print("No event selected")
-
-        elif command == "delete -r":
-            query = input("Input name of the event which reminders you'd like to delete")
-            events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime', q=query).execute()
-            try:
-                selected = get_selected_event(events.get('items', []))
-                delete_reminders(api, selected)
                 print("Deleted reminder succesfully")
             except AttributeError:
                 print("No event selected")
