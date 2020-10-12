@@ -8,7 +8,6 @@ class CalendarGUITestGetDetailedEvent(unittest.TestCase):
     def test_get_detailed_event_raise_value_error(self):
         event = {
             'irrelevant': "nonsense"
-
         }
         with self.assertRaises(ValueError):
             CalendarGUI.get_detailed_event(event)
