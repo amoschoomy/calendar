@@ -27,6 +27,9 @@ from google.auth.transport.requests import Request
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
+if os.environ.get('DISPLAY', '') == '':
+    os.environ.__setitem__('DISPLAY', ':0.0')
+
 root = Tk()
 events = None
 api = None
@@ -335,5 +338,7 @@ reminderlist.bind('<<ListboxSelect>>', enable_delete_reminder)
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     try:
         main()
+
     except KeyboardInterrupt:
         pass
+
