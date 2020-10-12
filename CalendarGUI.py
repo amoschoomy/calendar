@@ -32,7 +32,6 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 if os.environ.get('DISPLAY', '') == '':
     os.environ.__setitem__('DISPLAY', ':99')
 
-root = Tk()
 events = None
 api = None
 
@@ -192,7 +191,8 @@ def enable_periods():
         nv_year.configure(state="disable")
 
 
-dates_in_month = {"1": 31,"2": 28,"3": 31,"4": 30,"5": 31,"6": 30,"7": 31,"8": 31,"9": 30,"10": 31,"11": 30,"12": 31, "All":31}
+dates_in_month = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31, "6": 30, "7": 31, "8": 31, "9": 30, "10": 31, "11": 30,
+                  "12": 31, "All": 31}
 
 
 def get_periods(date, month, year):
@@ -222,7 +222,6 @@ def get_periods(date, month, year):
         startdate = None
         enddate = None
 
-
     return startdate, enddate
 
 
@@ -248,94 +247,117 @@ def enable_delete_reminder(*args):
         delete_reminder_btn.configure(state="normal")
 
 
+root = c = sch = searchIn = searchBtn = eventlist = refreshBtn = delete_event_btn = past_only = checkbtn = dateIn = updateBtn = nv \
+    = specific_only = navigate_checkbtn = nav_date = nv_date = nav_month = nv_month = nav_year = nv_year = eventdetails = reminderlist = \
+    delete_reminder_btn = None
+lbl1 = lbl2 = lbl3 = lbl4 = lbl5 = lbl6 = lbl7 = None
+
+dates = ["All"] + [str(i) for i in range(1, 32)]
+months = ["All"] + [str(i) for i in range(1, 13)]
+years = ["All"] + [str(i) for i in range(int(datetime.datetime.now().year) - 5, int(datetime.datetime.now().year) + 2)]
+
+
+def assign_elements_to_grid():
+
+    c.grid(column=0, row=0, sticky=(N, W, E, S))
+    sch.grid(row=0, columnspan=2, sticky=(W, E))
+    searchIn.grid(row=0, column=1, padx=5, sticky=(W, E))
+    searchBtn.grid(row=0, column=2, padx=5, sticky=E)
+    eventlist.grid(row=2, columnspan=2, rowspan=8, sticky=(W, E))
+    refreshBtn.grid(row=2, column=2, padx=5, sticky=(N, E))
+    delete_event_btn.grid(row=3, column=2, padx=5, sticky=(N, E))
+    dateIn.grid(row=10, column=1, pady=5, padx=5, sticky=(W, E))
+    checkbtn.grid(row=10, sticky=W)
+    updateBtn.grid(row=10, rowspan=2, column=2, padx=5, sticky=(N, S, E))
+    nv.grid(row=11, columnspan=2, sticky=(W, E))
+    navigate_checkbtn.grid(column=0, row=0, sticky=W)
+    nv_date.grid(column=2, row=0, sticky=E)
+    nv_month.grid(column=4, row=0, sticky=E)
+    nv_year.grid(column=6, row=0, sticky=E)
+    eventdetails.grid(row=13, columnspan=3, rowspan=10, sticky=(W, E))
+    reminderlist.grid(row=25, columnspan=2, rowspan=8, sticky=(W, E), pady=5)
+    delete_reminder_btn.grid(row=25, column=2, padx=5, sticky=(N, E))
+
+    lbl1.grid(row=0, column=0, sticky=E)
+    lbl2.grid(row=1, sticky=W)
+    lbl3.grid(column=1, row=0, sticky=E)
+    lbl4.grid(column=3, row=0, sticky=E)
+    lbl5.grid(column=5, row=0, sticky=E)
+    lbl6.grid(row=12, sticky=W)
+    lbl7.grid(row=24, sticky=W)
+
+
+def bind_elements_command():
+    searchBtn.configure(command=reload_event_list)
+    refreshBtn.configure(command=reload_event_list)
+    updateBtn.configure(command=reload_event_list)
+    checkbtn.configure(command=enable_date_textbox)
+    navigate_checkbtn.configure(command=enable_periods)
+    delete_event_btn.configure(command=delete_event)
+    delete_reminder_btn.configure(command=delete_reminder)
+    # Bind element actions to their respective functions
+    eventlist.bind('<<ListboxSelect>>', load_event_details)
+    reminderlist.bind('<<ListboxSelect>>', enable_delete_reminder)
+
+
 def main():
-    global api
+    global api, c, sch, searchIn, searchBtn, eventlist, refreshBtn, delete_event_btn, past_only, checkbtn, dateIn, updateBtn, nv, specific_only, \
+        navigate_checkbtn, nav_date, nv_date, nav_month, nv_month, nav_year, nv_year, eventdetails, reminderlist, \
+        delete_reminder_btn, root, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7
+
     api = get_calendar_api()
+    # Init and configure eleements
+    # Create and grid the outer content frame
+    root = Tk()
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_rowconfigure(0, weight=1)
+    c = ttk.Frame(padding=(5, 5, 12, 0))
+    # Search Elements
+    sch = ttk.Frame(c)
+    lbl1 = Label(sch, text="Search events: ")
+    searchIn = ttk.Entry(sch, width=50)
+    searchBtn = ttk.Button(c, text="Search")
+    # Events List Elements
+    lbl2 = Label(c, text="Events")
+    eventlist = Listbox(c, height=8, exportselection=False)
+    refreshBtn = ttk.Button(c, text="Refresh")
+    delete_event_btn = ttk.Button(c, text="Delete", state="disable")
+    # Show past events elements
+    past_only = IntVar()
+    checkbtn = Checkbutton(c, text="Show past events since: (DD/MM/YYYY)",variable=past_only)
+    dateIn = ttk.Entry(c, state="disabled")
+    updateBtn = ttk.Button(c, text="Update")
+    # Navigate events elements
+    nv = ttk.Frame(c)
+    specific_only = IntVar()
+    navigate_checkbtn = Checkbutton(nv, variable=specific_only, text="Show only events on: ")
+    lbl3 = Label(nv, text="Date")
+    nav_date = StringVar()
+    nav_date.set(dates[0])
+    nv_date = OptionMenu(nv, nav_date, *dates)
+    lbl4 = Label(nv, text="Month")
+    nav_month = StringVar()
+    nav_month.set(months[0])
+    nv_month = OptionMenu(nv, nav_month, *months)
+    lbl5 = Label(nv, text="Year")
+    nav_year = StringVar()
+    nav_year.set(years[0])
+    nv_year = OptionMenu(nv, nav_year, *years)
+    nv_date.configure(state="disable")
+    nv_month.configure(state="disable")
+    nv_year.configure(state="disable")
+    # Event details elements
+    lbl6 = Label(c, text="Event Details:")
+    eventdetails = Text(c, height=10, width=30)
+    # Reminders elements
+    lbl7 = Label(c, text="Reminders:")
+    reminderlist = Listbox(c, height=8)
+    delete_reminder_btn = ttk.Button(c, text="Delete", state="disable")
+    assign_elements_to_grid()
+    bind_elements_command()
     reload_event_list()
     root.mainloop()
 
-
-# Create and grid the outer content frame
-c = ttk.Frame(root, padding=(5, 5, 12, 0))
-c.grid(column=0, row=0, sticky=(N, W, E, S))
-root.grid_columnconfigure(0, weight=1)
-root.grid_rowconfigure(0, weight=1)
-
-# Search Elements
-sch = ttk.Frame(c)
-sch.grid(row=0, columnspan=2, sticky=(W, E))
-
-Label(sch, text="Search events: ").grid(row=0, column=0, sticky=E)
-searchIn = ttk.Entry(sch, width=50)
-searchIn.grid(row=0, column=1, padx=5, sticky=(W, E))
-searchBtn = ttk.Button(c, text="Search", command=reload_event_list)
-searchBtn.grid(row=0, column=2, padx=5, sticky=E)
-
-# Events List Elements
-Label(c, text="Events").grid(row=1, sticky=W)
-eventlist = Listbox(c, height=8, exportselection=False)
-eventlist.grid(row=2, columnspan=2, rowspan=8, sticky=(W, E))
-ttk.Button(c, text="Refresh", command=reload_event_list).grid(row=2, column=2, padx=5, sticky=(N, E))
-delete_event_btn = ttk.Button(c, text="Delete", command=delete_event, state="disable")
-delete_event_btn.grid(row=3, column=2, padx=5, sticky=(N, E))
-
-# Show past events elements
-past_only = IntVar()
-checkbtn = Checkbutton(c, text="Show past events since: (DD/MM/YYYY)", variable=past_only,
-                       command=enable_date_textbox).grid(row=10,
-                                                         sticky=W)
-dateIn = ttk.Entry(c, state="disabled")
-dateIn.grid(row=10, column=1, pady=5, padx=5, sticky=(W, E))
-updateBtn = ttk.Button(c, text="Update", command=reload_event_list)
-updateBtn.grid(row=10, rowspan=2, column=2, padx=5, sticky=(N, S, E))
-
-# Navigate events elements
-nv = ttk.Frame(c)
-nv.grid(row=11, columnspan=2, sticky=(W, E))
-specific_only = IntVar()
-navigate_checkbtn = Checkbutton(nv, text="Show only events on: ", variable=specific_only, command=enable_periods).grid(
-    column=0, row=0, sticky=W)
-
-Label(nv, text="Date").grid(column=1, row=0, sticky=E)
-dates = ["All"] + [str(i) for i in range(1, 32)]
-nav_date = StringVar()
-nav_date.set(dates[0])
-nv_date = OptionMenu(nv, nav_date, *dates)
-nv_date.grid(column=2, row=0, sticky=E)
-
-Label(nv, text="Month").grid(column=3, row=0, sticky=E)
-months = ["All"] + [str(i) for i in range(1, 13)]
-nav_month = StringVar()
-nav_month.set(months[0])
-nv_month = OptionMenu(nv, nav_month, *months)
-nv_month.grid(column=4, row=0, sticky=E)
-
-Label(nv, text="Year").grid(column=5, row=0, sticky=E)
-years = ["All"] + [str(i) for i in range(int(datetime.datetime.now().year) - 5, int(datetime.datetime.now().year) + 2)]
-nav_year = StringVar()
-nav_year.set(years[0])
-nv_year = OptionMenu(nv, nav_year, *years)
-nv_year.grid(column=6, row=0, sticky=E)
-
-nv_date.configure(state="disable")
-nv_month.configure(state="disable")
-nv_year.configure(state="disable")
-
-# Event details elements
-Label(c, text="Event Details:").grid(row=12, sticky=W)
-eventdetails = Text(c, height=10, width=30)
-eventdetails.grid(row=13, columnspan=3, rowspan=10, sticky=(W, E))
-
-# Reminders elements
-Label(c, text="Reminders:").grid(row=24, sticky=W)
-reminderlist = Listbox(c, height=8)
-reminderlist.grid(row=25, columnspan=2, rowspan=8, sticky=(W, E), pady=5)
-delete_reminder_btn = ttk.Button(c, text="Delete", command=delete_reminder, state="disable")
-delete_reminder_btn.grid(row=25, column=2, padx=5, sticky=(N, E))
-
-# Bind element actions to their respective functions
-eventlist.bind('<<ListboxSelect>>', load_event_details)
-reminderlist.bind('<<ListboxSelect>>', enable_delete_reminder)
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     try:
@@ -343,4 +365,3 @@ if __name__ == "__main__":  # Prevents the main() function from being called by 
 
     except KeyboardInterrupt:
         pass
-

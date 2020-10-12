@@ -1037,10 +1037,12 @@ class CalendarGUITestDeleteReminder(unittest.TestCase):
 
 class CalendarGUITestEnableDateTextbox(unittest.TestCase):
 
+    @patch.object(CalendarGUI, 'specific_only')
     @patch.object(CalendarGUI, 'past_only')
     @patch.object(CalendarGUI, 'dateIn')
     @patch.object(CalendarGUI, 'enable_periods')
-    def test_enable_date_textbox_show_past_events_checked(self, periods, dateIn, past):
+    def test_enable_date_textbox_show_past_events_checked(self, periods, dateIn, past, specific):
+
         past.get.return_value = 1
         CalendarGUI.enable_date_textbox()
 
@@ -1048,7 +1050,7 @@ class CalendarGUITestEnableDateTextbox(unittest.TestCase):
         self.assertEqual(dateIn.configure.call_count, 1)
 
         # changes
-        self.assertFalse(CalendarGUI.specific_only.get())
+        self.assertEqual(specific.set.call_count, 1)
         self.assertEqual(periods.call_count, 1)
 
     @patch.object(CalendarGUI, 'past_only')
@@ -1066,12 +1068,13 @@ class CalendarGUITestEnableDateTextbox(unittest.TestCase):
 
 class CalendarGUITestEnablePeriods(unittest.TestCase):
 
+    @patch.object(CalendarGUI, 'past_only')
     @patch.object(CalendarGUI, 'specific_only')
     @patch.object(CalendarGUI, 'enable_date_textbox')
     @patch.object(CalendarGUI, 'nv_year')
     @patch.object(CalendarGUI, 'nv_month')
     @patch.object(CalendarGUI, 'nv_date')
-    def test_enable_date_textbox_show_specific_events_checked(self, ndate, nmonth, nyear, enable_date, specific):
+    def test_enable_date_textbox_show_specific_events_checked(self, ndate, nmonth, nyear, enable_date, specific, past):
         specific.get.return_value = 1
         CalendarGUI.enable_periods()
 
@@ -1081,7 +1084,7 @@ class CalendarGUITestEnablePeriods(unittest.TestCase):
         self.assertEqual(nyear.configure.call_count, 1)
 
         # changes
-        self.assertFalse(CalendarGUI.past_only.get())
+        self.assertEqual(past.set.call_count, 1)
         self.assertEqual(enable_date.call_count, 1)
 
     @patch.object(CalendarGUI, 'specific_only')
@@ -1285,6 +1288,67 @@ class CalendarGUITestEnableDeleteReminder(unittest.TestCase):
         self.assertEqual(delete_reminder_btn.configure.call_count, event_selected)
 
 
+class CalendarGUIUIElementsTest(unittest.TestCase):
+
+    @patch.object(CalendarGUI, 'c')
+    @patch.object(CalendarGUI, 'sch')
+    @patch.object(CalendarGUI, 'searchIn')
+    @patch.object(CalendarGUI, 'searchBtn')
+    @patch.object(CalendarGUI, 'eventlist')
+    @patch.object(CalendarGUI, 'refreshBtn')
+    @patch.object(CalendarGUI, 'delete_event_btn')
+    @patch.object(CalendarGUI, 'dateIn')
+    @patch.object(CalendarGUI, 'checkbtn')
+    @patch.object(CalendarGUI, 'updateBtn')
+    @patch.object(CalendarGUI, 'nv')
+    @patch.object(CalendarGUI, 'navigate_checkbtn')
+    @patch.object(CalendarGUI, 'nv_date')
+    @patch.object(CalendarGUI, 'nv_month')
+    @patch.object(CalendarGUI, 'nv_year')
+    @patch.object(CalendarGUI, 'eventdetails')
+    @patch.object(CalendarGUI, 'reminderlist')
+    @patch.object(CalendarGUI, 'delete_reminder_btn')
+    @patch.object(CalendarGUI, 'lbl1')
+    @patch.object(CalendarGUI, 'lbl2')
+    @patch.object(CalendarGUI, 'lbl3')
+    @patch.object(CalendarGUI, 'lbl4')
+    @patch.object(CalendarGUI, 'lbl5')
+    @patch.object(CalendarGUI, 'lbl6')
+    @patch.object(CalendarGUI, 'lbl7')
+    def test_assign_elements_to_grid(self, c, sch, searchIn, searchBtn, eventlist, refreshBtn, delete_event_btn, checkbtn, dateIn, updateBtn, nv, \
+        navigate_checkbtn, nv_date, nv_month,nv_year, eventdetails, reminderlist, delete_reminder_btn, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7):
+        CalendarGUI.assign_elements_to_grid()
+        elements = locals()
+        for i in elements:
+            if i != 'self':
+                self.assertEqual(elements[i].grid.call_count,1)
+
+
+    @patch.object(CalendarGUI, 'reminderlist')
+    @patch.object(CalendarGUI, 'eventlist')
+    @patch.object(CalendarGUI, 'delete_reminder_btn')
+    @patch.object(CalendarGUI, 'delete_event_btn')
+    @patch.object(CalendarGUI, 'navigate_checkbtn')
+    @patch.object(CalendarGUI, 'checkbtn')
+    @patch.object(CalendarGUI, 'updateBtn')
+    @patch.object(CalendarGUI, 'refreshBtn')
+    @patch.object(CalendarGUI, 'searchBtn')
+    def test_bind_elements_command(self, searchBtn, refreshBtn, updateBtn, checkbtn, navigate_checkbtn, delete_event_btn,
+                                   delete_reminder_btn, eventlist, reminderlist):
+
+        CalendarGUI.bind_elements_command()
+        self.assertEqual(searchBtn.configure.call_count, 1)
+        self.assertEqual(refreshBtn.configure.call_count, 1)
+        self.assertEqual(updateBtn.configure.call_count, 1)
+        self.assertEqual(checkbtn.configure.call_count, 1)
+        self.assertEqual(navigate_checkbtn.configure.call_count, 1)
+        self.assertEqual(delete_event_btn.configure.call_count, 1)
+        self.assertEqual(delete_reminder_btn.configure.call_count, 1)
+        self.assertEqual(eventlist.bind.call_count, 1)
+        self.assertEqual(reminderlist.bind.call_count, 1)
+
+
+
 #
 # class CalendarGUITestMain(unittest.TestCase):
 #
@@ -1296,7 +1360,7 @@ def main():
     # Create the test suite from the cases above.
     test_classes = [CalendarGUITestGetDetailedEvent, CalendarGUITestReloadEventList, CalendarGUITestLoadEventDetails, CalendarGUITestDeleteEvent,
                     CalendarGUITestDeleteReminder, CalendarGUITestEnableDateTextbox, CalendarGUITestEnablePeriods, CalendarGUITestGetPeriods,
-                    CalendarGUITestVerifyDate, CalendarGUITestEnableDeleteReminder]  # Test Classes
+                    CalendarGUITestVerifyDate, CalendarGUITestEnableDeleteReminder, CalendarGUIUIElementsTest]  # Test Classes
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.
