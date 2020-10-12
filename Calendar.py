@@ -341,7 +341,6 @@ def run_calendar(api):
     for directive in directives:
         print(directive)
     print("-e is for events, while -r is for reminders")
-    print("\n")
     while True:
         command = input("command>")
         if command not in directives:
@@ -415,8 +414,9 @@ def run_calendar(api):
                                 print("No delete instruction, returning to calendar...")
                                 break
                         except AttributeError:
-                            print("Failure. No event selected")
+                            print("Failure. No event/reminder selected")
                     else:
+                        print("Exiting Navigation")
                         break
                 except ValueError:
                     print("Wrong input. Try again")
@@ -448,8 +448,6 @@ def get_selected_event(results):
     try:
         index = int(input("Select an event: "))
         userselect = dict[index]
-        print("Selected event: " + dict[index].get('summary', "No title"))
-
     except ValueError:
         pass
     except KeyError:
@@ -470,18 +468,15 @@ def get_selected_reminders(event):
 
     for i in range(len(overrides)):
         prompt += str(i) + ". Reminder through " + overrides[i].get("method") + " " + str(
-            overrides[i].get("minutes")) + " minutes before event starts"
+            overrides[i].get("minutes")) + " minutes before event starts\n"
         dict[i] = overrides[i]
 
     print(prompt)
-
     selected = None
     try:
         index = int(input("Select a reminder to delete: "))
-        userselect = dict[index]
-        if userselect is not None:
-            selected = index
-            print("Selected reminder: " + dict[index]['summary'])
+        print("Selected reminder: Reminder through " + dict[index]['method'] + " " + str(dict[index]['minutes']) + " minutes before event starts\n")
+        selected = index
     except ValueError:
         pass
     except KeyError:
