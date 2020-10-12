@@ -6,5 +6,6 @@ test:
   - pip install coverage
   - python CalendarTest.py
   - python CalenderTestRunCalendar.py
-  - coverage run -m --branch CalendarTest CalenderTestRunCalendar
-  - coverage report -m
+  - coverage run -m -a --branch CalendarTest
+  - coverage run -m -a --branch CalendarTest
+  - coverage report
