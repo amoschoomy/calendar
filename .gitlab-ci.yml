@@ -4,7 +4,7 @@ test:
   - pip install --upgrade pip
   - pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
   - pip install coverage
-  - pip install tkinter
+  - pip install tk
   - python CalendarGUITest.py
   - coverage run -m --branch CalendarTestGUI
   - coverage report
