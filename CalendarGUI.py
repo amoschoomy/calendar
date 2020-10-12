@@ -18,6 +18,8 @@ from __future__ import print_function
 import datetime
 import pickle
 import os.path
+import sys
+import os
 from tkinter import *
 from tkinter import ttk
 from googleapiclient.discovery import build
@@ -28,7 +30,7 @@ from google.auth.transport.requests import Request
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 if os.environ.get('DISPLAY', '') == '':
-    os.environ.__setitem__('DISPLAY', ':0.0')
+    os.environ.__setitem__('DISPLAY', ':0')
 
 root = Tk()
 events = None
