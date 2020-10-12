@@ -6,5 +6,5 @@ test:
   - pip install coverage
   - pip install tk
   - python CalendarGUITest.py
-  - coverage run -m --branch CalendarTestGUI
+  - coverage run -m --branch CalendarTestGUI.py
   - coverage report
