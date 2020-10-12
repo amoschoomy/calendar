@@ -3,6 +3,135 @@ import unittest
 from unittest.mock import Mock, patch
 import CalendarGUI
 
+class CalendarGUITestGetDetailedEvent(unittest.TestCase):
+
+    def test_get_detailed_event_raise_value_error(self):
+        event = {
+            'irrelevant': "nonsense"
+
+        }
+        with self.assertRaises(ValueError):
+            CalendarGUI.get_detailed_event(event)
+
+    def test_get_detailed_event_raise_attribute_error(self):
+        event = "FAKE EVENT"
+        with self.assertRaises(AttributeError):
+            CalendarGUI.get_detailed_event(event)
+
+    def test_get_detailed_event_no_visibility_set_attendees_set_no_location_set(self):
+        # This test for the events that have no visibility key aka
+        # default visibility
+        event = {
+            "summary": "Debate",
+            "start": {
+                "dateTime": "2020-06-10T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-06-10T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': True,
+                'overrides': [
+
+                ]
+            },
+            "status": "confirmed",
+            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+            'created': '2020-10-09T04:10:47.000Z',
+            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
+                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+
+        }
+        detailed_event = CalendarGUI.get_detailed_event(event)
+        # Attendees are included in the event but not visiblity or location
+        # Asserts the presence of string information of attendees
+        self.assertIn("Attendees: trump@monash.edu, donald@monash.edu", detailed_event)
+
+    def test_get_detailed_event_visibility_set_no_attendees_set_no_location_set(self):
+        # This test for the events that have no visibility key aka
+        # default visibility
+        event = {
+            "summary": "Debate",
+            "start": {
+                "dateTime": "2020-06-10T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-06-10T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': True,
+                'overrides': [
+
+                ]
+            },
+            "status": "confirmed",
+            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+            'created': '2020-10-09T04:10:47.000Z',
+            'visibility': "private",
+
+        }
+        detailed_event = CalendarGUI.get_detailed_event(event)
+        # Assert this method output change where visiblity is part of the event
+        self.assertIn("Visibility: private", detailed_event)
+
+    def test_get_detailed_event_no_visibility_set_no_attendees_set_location_set(self):
+        # This test for the events that have no visibility key aka
+        # default visibility
+        event = {
+            "summary": "Debate",
+            "start": {
+                "dateTime": "2020-06-10T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-06-10T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': True,
+                'overrides': [
+
+                ]
+            },
+            "status": "confirmed",
+            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+            'created': '2020-10-09T04:10:47.000Z',
+            'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
+            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
+                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+
+        }
+        detailed_event = CalendarGUI.get_detailed_event(event)
+        # Assert this  method output change where location is included in the event
+        self.assertIn("Location: Monash University, Wellington Rd, Clayton VIC 3800, Australia", detailed_event)
+
+    def test_get_detailed_event_visibility_set_attendees_set_location_set(self):
+        # This test for the events that have no visibility key aka
+        # default visibility
+        event = {
+            "summary": "Debate",
+            "start": {
+                "dateTime": "2020-06-10T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-06-10T02:45:00.000000Z"
+            }, "reminders": {
+                'useDefault': True,
+                'overrides': [
+
+                ]
+            },
+            "status": "confirmed",
+            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+            'created': '2020-10-09T04:10:47.000Z',
+            'visibility': "private",
+            'location': 'Monash University, Wellington Rd, Clayton VIC 3800, Australia',
+            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
+                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+
+        }
+        detailed_event = CalendarGUI.get_detailed_event(event)
+
+        # Assert all keys found succesfully and string containing the information is printed
+        self.assertIn("Visibility: private", detailed_event)
+        self.assertIn("Location: Monash University, Wellington Rd, Clayton VIC 3800, Australia", detailed_event)
+        self.assertIn("Attendees: trump@monash.edu, donald@monash.edu", detailed_event)
+
 
 class CalendarGUITestReloadEventList(unittest.TestCase):
 
@@ -818,49 +947,49 @@ class CalendarGUITestDeleteReminder(unittest.TestCase):
         self.assertEqual(api.events.return_value.update.return_value.execute.call_count, reminder_selected)
         self.assertEqual(load_event_details.call_count, reminder_selected)
 
-        @patch.object(CalendarGUI, 'load_event_details')
-        @patch.object(CalendarGUI, 'api')
-        @patch.object(CalendarGUI, 'reminderlist')
-        @patch.object(CalendarGUI, 'eventlist')
-        def test_delete_reminder_has_selected_event_and_reminder(self, eventlist, reminderlist, api,
-                                                                 load_event_details):
-            eventlist.curselection.return_value = ["0"]
-            reminderlist.curselection.return_value = ["0"]
-            CalendarGUI.events = [{
-                "summary": "test2",
-                "id": "test12345",
-                "start": {
-                    "dateTime": "2020-10-03T02:00:00.000000Z"
-                },
-                "end": {
-                    "dateTime": "2020-10-03T02:45:00.000000Z"
-                },
+    @patch.object(CalendarGUI, 'load_event_details')
+    @patch.object(CalendarGUI, 'api')
+    @patch.object(CalendarGUI, 'reminderlist')
+    @patch.object(CalendarGUI, 'eventlist')
+    def test_delete_reminder_has_selected_event_and_reminder(self, eventlist, reminderlist, api,
+                                                             load_event_details):
+        eventlist.curselection.return_value = ["0"]
+        reminderlist.curselection.return_value = ["0"]
+        CalendarGUI.events = [{
+            "summary": "test2",
+            "id": "test12345",
+            "start": {
+                "dateTime": "2020-10-03T02:00:00.000000Z"
+            },
+            "end": {
+                "dateTime": "2020-10-03T02:45:00.000000Z"
+            },
 
-                "status": "confirmed",
-                'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
-                'created': '2020-10-09T04:10:47.000Z',
-                'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
-                              {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
-                "reminders": {
-                    "useDefault": False,
-                    "overrides": [
-                        {"method": "email", "minutes": 1},
-                        {"method": "popup", "minutes": 10}
-                    ]
-                }
+            "status": "confirmed",
+            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+            'created': '2020-10-09T04:10:47.000Z',
+            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
+                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+            "reminders": {
+                "useDefault": False,
+                "overrides": [
+                    {"method": "email", "minutes": 1},
+                    {"method": "popup", "minutes": 10}
+                ]
             }
-            ]
-            CalendarGUI.delete_reminder()
+        }
+        ]
+        CalendarGUI.delete_reminder()
 
-            # constant
-            self.assertEqual(eventlist.curselection.call_count, 1)
-            self.assertEqual(reminderlist.curselection.call_count, 1)
-            # changes
-            self.assertFalse(CalendarGUI.events[0]['reminders']['useDefault'])
-            self.assertEqual(len(CalendarGUI.events[0]['reminders']['overrides']), 1)
-            reminder_selected = 1
-            self.assertEqual(api.events.return_value.update.return_value.execute.call_count, reminder_selected)
-            self.assertEqual(load_event_details.call_count, reminder_selected)
+        # constant
+        self.assertEqual(eventlist.curselection.call_count, 1)
+        self.assertEqual(reminderlist.curselection.call_count, 1)
+        # changes
+        self.assertFalse(CalendarGUI.events[0]['reminders']['useDefault'])
+        self.assertEqual(len(CalendarGUI.events[0]['reminders']['overrides']), 1)
+        reminder_selected = 1
+        self.assertEqual(api.events.return_value.update.return_value.execute.call_count, reminder_selected)
+        self.assertEqual(load_event_details.call_count, reminder_selected)
 
     @patch.object(CalendarGUI, 'load_event_details')
     @patch.object(CalendarGUI, 'api')
@@ -1066,17 +1195,111 @@ class CalendarGUITestEnableDeleteReminder(unittest.TestCase):
         event_selected = 1
         self.assertEqual(delete_reminder_btn.configure.call_count, event_selected)
 
-class CalendarGUITestGetPeriods():
+class CalendarGUITestGetPeriods(unittest.TestCase):
+
+    def test_get_periods_specified_day_specified_month_specified_year(self):
+        d = "12"
+        m = "10"  # Month 10 is useless here as we wanted all years
+        y = "2019"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2019-10-12" # There are the same as we wanted events for that day
+        end = "2019-10-12"
+        self.assertIn(start, result[0])
+        self.assertIn(end, result[1])
+
+    def test_get_periods_all_day_specified_month_year(self):
+        d = "All"
+        m = "10"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2020-10-01"
+        end = "2020-10-31"
+        self.assertIn(start,result[0])
+        self.assertIn(end,result[1])
+
+    def test_get_periods_all_day_all_month_specified_year(self):
+        d = "All"
+        m = "All"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2020-01-01"
+        end = "2020-12-31"
+        self.assertIn(start,result[0])
+        self.assertIn(end,result[1])
+
+    def test_get_periods_specified_day_all_month_specified_year(self):
+        d = "12"  # Day 12 is useless here as we wanted all months for 2020
+        m = "All"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2020-01-01"
+        end = "2020-12-31"
+        self.assertIn(start,result[0])
+        self.assertIn(end,result[1])
+
+    def test_get_periods_all_day_all_month_all_year(self):
+        d = "All"
+        m = "All"
+        y = "All"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_specified_day_specified_month__all_year(self):
+        d = "12" # Day 12 and month 12 is useless here as we wanted all years
+        m = "12" # Day 12 and month 12 is useless here as we wanted all years
+        y = "All"
+        result = CalendarGUI.get_periods(d, m, y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_specified_day_all_month_all_year(self):
+        d = "12" # Day 12 is useless here as we wanted all months and year
+        m = "All"
+        y = "All"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_all_day_specified_month_all_year(self):
+        d = "All"
+        m = "10"  # Month 10 is useless here as we wanted all years
+        y = "All"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_invalid_date_value_error(self):
+        d = "31" # 31st September doesnt exist
+        m = "9"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIn(str(datetime.utcnow().isoformat())[:10], result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_invalid_date_value_error_2(self):
+        d = "30" # 30th February doesnt exist
+        m = "2"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIn(str(datetime.utcnow().isoformat())[:10], result[0])
+        self.assertIsNone(result[1])
+
+
+class CalendarGUITestRunCalendarGUI(unittest.TestCase):
+
+    def test_main_function(self):
+        CalendarGUI.main()
+
 
 def main():
     # Create the test suite from the cases above.
-    test_classes = [CalendarGUITestReloadEventList, CalendarGUITestLoadEventDetails, CalendarGUITestDeleteEvent,
+    test_classes = [CalendarGUITestGetDetailedEvent, CalendarGUITestReloadEventList, CalendarGUITestLoadEventDetails, CalendarGUITestDeleteEvent,
                     CalendarGUITestDeleteReminder, CalendarGUITestEnableDateTextbox, CalendarGUITestEnablePeriods,
-                    CalendarGUITestVerifyDate, CalendarGUITestEnableDeleteReminder]  # Test Classes
+                    CalendarGUITestVerifyDate, CalendarGUITestEnableDeleteReminder,CalendarGUITestGetPeriods]  # Test Classes
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.
         unittest.TextTestRunner(verbosity=2).run(suite)
-
 
 main()
