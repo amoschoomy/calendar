@@ -1286,11 +1286,11 @@ class CalendarGUITestEnableDeleteReminder(unittest.TestCase):
         self.assertEqual(delete_reminder_btn.configure.call_count, event_selected)
 
 
-
-class CalendarGUITestMain(unittest.TestCase):
-
-    def test_main_function(self):
-        CalendarGUI.main()
+#
+# class CalendarGUITestMain(unittest.TestCase):
+#
+#     def test_main_function(self):
+#         CalendarGUI.main()
 
 
 def main():
