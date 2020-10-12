@@ -95,11 +95,15 @@ def updateEvents():
 
     if searchIn.get().lower() != "":
         query = searchIn.get()
+
     if past_only.get() and past_date_tokens:
         starting_time = datetime.datetime.strptime(
             past_date_tokens[2] + "-" + past_date_tokens[1] + "-" + past_date_tokens[0],
             "%Y-%m-%d").isoformat() + ".000000Z"
-        end_time = datetime.datetime.utcnow().isoformat() + 'Z'
+    elif specific_only.get():
+        period = get_periods()
+        starting_time = period[0]
+        end_time = period[1]
 
     events = api.events().list(calendarId='primary', timeMin=starting_time, timeMax=end_time, singleEvents=True,
                                orderBy='startTime', q=query).execute().get("items", [])
@@ -168,10 +172,54 @@ def deleteReminder():
 def enableTextbox():
     if past_only.get():
         dateIn.configure(state="normal")
-        updateBtn.configure(state="normal")
+        specific_only.set(0)
+        enablePeriods()
     else:
-        dateIn.configure(state="disabled")
-        updateBtn.configure(state="disabled")
+        dateIn.configure(state="disable")
+
+
+
+def enablePeriods():
+    if specific_only.get():
+        nv_date.configure(state="normal")
+        nv_month.configure(state="normal")
+        nv_year.configure(state="normal")
+        past_only.set(0)
+        enableTextbox()
+    else:
+        nv_date.configure(state="disable")
+        nv_month.configure(state="disable")
+        nv_year.configure(state="disable")
+
+def get_periods():
+    date = nav_date.get()
+    month = nav_month.get()
+    year = nav_year.get()
+
+    if month == "All":
+        month = "1"
+        endmonth = "12"
+    else:
+        endmonth = month
+
+    if date == "All":
+        date = "1"
+        if endmonth in ["1","3","5","7","8","10","12"]:
+            endday = "31"
+        elif endmonth == "2":
+            endday = "28"
+        else:
+            endday = "30"
+    else:
+        endday = date
+
+    if year == "All":
+        startdate = None
+        enddate = None
+    else:
+        startdate = datetime.datetime.strptime(year + "-" + month + "-" + date + " 23:59:59", '%Y-%m-%d %H:%M:%S').isoformat() + "Z"
+        enddate = datetime.datetime.strptime(year + "-" + endmonth + "-" + endday + " 23:59:59", '%Y-%m-%d %H:%M:%S').isoformat() + "Z"
+    return startdate, enddate
 
 
 def verify_date(string):
@@ -200,9 +248,12 @@ root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(0, weight=1)
 
 # Search Elements
-Label(c, text="Search events: ").grid(row=0, sticky=(E))
-searchIn = ttk.Entry(c)
-searchIn.grid(row=0, column=1, padx=5, sticky=(W, E))
+sch = ttk.Frame(c)
+sch.grid(row=0,columnspan=2,sticky=(W, E))
+
+Label(sch, text="Search events: ").grid(row=0,column=0, sticky=E)
+searchIn = ttk.Entry(sch,width=50)
+searchIn.grid(row=0, column=1, padx=5, sticky=(W,E))
 searchBtn = ttk.Button(c, text="Search", command=updateEvents)
 searchBtn.grid(row=0, column=2, padx=5, sticky=E)
 
@@ -216,24 +267,56 @@ delete_event_btn.grid(row=3, column=2, padx=5, sticky=(N, E))
 
 # Show past events elements
 past_only = IntVar()
-checkbtn = Checkbutton(c, text="Show only past events since: ", variable=past_only, command=enableTextbox).grid(row=10,
+checkbtn = Checkbutton(c, text="Show past events since: (DD/MM/YYYY)", variable=past_only, command=enableTextbox).grid(row=10,
                                                                                                                 sticky=W)
 dateIn = ttk.Entry(c, state="disabled")
 dateIn.grid(row=10, column=1, pady=5, padx=5, sticky=(W, E))
-updateBtn = ttk.Button(c, text="Update", state="disable", command=updateEvents)
-updateBtn.grid(row=10, column=2, padx=5, sticky=E)
+updateBtn = ttk.Button(c, text="Update", command=updateEvents)
+updateBtn.grid(row=10, rowspan=2,column=2, padx=5, sticky=(N,S,E))
+
+# Navigate events elements
+nv = ttk.Frame(c)
+nv.grid(row =11,columnspan=2,sticky=(W, E))
+specific_only = IntVar()
+navigate_checkbtn = Checkbutton(nv, text="Show only events on: ", variable=specific_only, command=enablePeriods).grid(column=0,row=0,sticky=W)
+
+Label(nv, text="Date").grid(column=1,row=0, sticky=E)
+dates = ["All"] + [str(i) for i in range(1,32)]
+nav_date = StringVar()
+nav_date.set(dates[0])
+nv_date = OptionMenu(nv,nav_date,*dates)
+nv_date.grid(column=2,row=0, sticky=E)
+
+Label(nv, text="Month").grid(column=3,row=0, sticky=E)
+months = ["All"] + [str(i) for i in range(1,13)]
+nav_month = StringVar()
+nav_month.set(months[0])
+nv_month = OptionMenu(nv,nav_month,*months)
+nv_month.grid(column=4,row=0, sticky=E)
+
+Label(nv, text="Year").grid(column=5,row=0, sticky=E)
+years = ["All"] + [str(i) for i in range(int(datetime.datetime.now().year) - 5, int(datetime.datetime.now().year) + 2)]
+nav_year = StringVar()
+nav_year.set(years[0])
+nv_year = OptionMenu(nv,nav_year,*years)
+nv_year.grid(column=6,row=0, sticky=E)
+
+nv_date.configure(state="disable")
+nv_month.configure(state="disable")
+nv_year.configure(state="disable")
+
 
 # Event details elements
-Label(c, text="Event Details:").grid(row=11, sticky=W)
+Label(c, text="Event Details:").grid(row=12, sticky=W)
 eventdetails = Text(c, height=10, width=30)
-eventdetails.grid(row=12, columnspan=3, rowspan=10, sticky=(W, E))
+eventdetails.grid(row=13, columnspan=3, rowspan=10, sticky=(W, E))
 
 # Reminders elements
-Label(c, text="Reminders:").grid(row=23, sticky=W)
+Label(c, text="Reminders:").grid(row=24, sticky=W)
 reminderlist = Listbox(c, height=8)
-reminderlist.grid(row=24, columnspan=2, rowspan=8, sticky=(W, E))
+reminderlist.grid(row=25, columnspan=2, rowspan=8, sticky=(W, E),pady=5)
 delete_reminder_btn = ttk.Button(c, text="Delete", command=deleteReminder, state="disable")
-delete_reminder_btn.grid(row=24, column=2, padx=5, sticky=(N, E))
+delete_reminder_btn.grid(row=25, column=2, padx=5, sticky=(N, E))
 
 # Bind element actions to their respective functions
 eventlist.bind('<<ListboxSelect>>', showEvent)
