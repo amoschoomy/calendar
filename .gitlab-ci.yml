@@ -1,7 +1,7 @@
 test:
   image: python:3.8
-  before_script:
-  - xvfb :99 1>/dev/null 2>&1 &
+  services:
+  - xvfb
   script:
   - pip install --upgrade pip
   - pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
