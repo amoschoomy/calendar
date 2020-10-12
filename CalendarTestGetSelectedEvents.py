@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import Calendar
 
 
-class TestCalendarGetSelectedEvents(unittest.TestCase):
+class CalendarTestGetSelectedEvents(unittest.TestCase):
 
     @patch('Calendar.input', create=True)
     def test_get_selected_events_value_error(self, mocked_input):
@@ -118,3 +118,10 @@ class TestCalendarGetSelectedEvents(unittest.TestCase):
         self.assertIsNotNone(userselect)
         self.assertEqual(userselect,results[1])
 
+def main():
+    suite = unittest.TestLoader().loadTestsFromTestCase(CalendarTestGetSelectedEvents)
+    # This will run the test suite.
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+
+main()
