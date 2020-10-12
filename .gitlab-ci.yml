@@ -6,7 +6,7 @@ test:
   - pip install coverage
   - python CalendarTest.py
   - python CalendarTestRunCalendar.py
-  - coverage run -m -a --branch CalendarTest
+  - coverage run -m --branch CalendarTest
   - coverage run -m -a --branch CalendarTestRunCalendar
   - coverage run -m -a --branch CalendarTestGetSelectedEvents
   - coverage run -m -a --branch CalendarTestGetSelectedReminders
