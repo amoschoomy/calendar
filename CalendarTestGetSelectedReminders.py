@@ -96,3 +96,11 @@ class CalendarTestGetSelectedReminders(unittest.TestCase):
         userselect = Calendar.get_selected_reminders(event)
         self.assertIsNotNone(userselect)
         self.assertEqual(-1, userselect)
+
+def main():
+    suite = unittest.TestLoader().loadTestsFromTestCase(CalendarTestGetSelectedReminders)
+    # This will run the test suite.
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+
+main()
