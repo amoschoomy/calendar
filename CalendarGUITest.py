@@ -1103,6 +1103,96 @@ class CalendarGUITestEnablePeriods(unittest.TestCase):
         self.assertEqual(enable_date.call_count, 0)
 
 
+class CalendarGUITestGetPeriods(unittest.TestCase):
+
+    def test_get_periods_specified_day_specified_month_specified_year(self):
+        d = "12"
+        m = "10"  # Month 10 is useless here as we wanted all years
+        y = "2019"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2019-10-12" # There are the same as we wanted events for that day
+        end = "2019-10-12"
+        self.assertIn(start, result[0])
+        self.assertIn(end, result[1])
+
+    def test_get_periods_all_day_specified_month_year(self):
+        d = "All"
+        m = "10"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2020-10-01"
+        end = "2020-10-31"
+        self.assertIn(start,result[0])
+        self.assertIn(end,result[1])
+
+    def test_get_periods_all_day_all_month_specified_year(self):
+        d = "All"
+        m = "All"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2020-01-01"
+        end = "2020-12-31"
+        self.assertIn(start,result[0])
+        self.assertIn(end,result[1])
+
+    def test_get_periods_specified_day_all_month_specified_year(self):
+        d = "12"  # Day 12 is useless here as we wanted all months for 2020
+        m = "All"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        start = "2020-01-01"
+        end = "2020-12-31"
+        self.assertIn(start,result[0])
+        self.assertIn(end,result[1])
+
+    def test_get_periods_all_day_all_month_all_year(self):
+        d = "All"
+        m = "All"
+        y = "All"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_specified_day_specified_month__all_year(self):
+        d = "12" # Day 12 and month 12 is useless here as we wanted all years
+        m = "12" # Day 12 and month 12 is useless here as we wanted all years
+        y = "All"
+        result = CalendarGUI.get_periods(d, m, y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_specified_day_all_month_all_year(self):
+        d = "12" # Day 12 is useless here as we wanted all months and year
+        m = "All"
+        y = "All"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_all_day_specified_month_all_year(self):
+        d = "All"
+        m = "10"  # Month 10 is useless here as we wanted all years
+        y = "All"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIsNone(result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_invalid_date_value_error(self):
+        d = "31" # 31st September doesnt exist
+        m = "9"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIn(str(datetime.utcnow().isoformat())[:10], result[0])
+        self.assertIsNone(result[1])
+
+    def test_get_periods_invalid_date_value_error_2(self):
+        d = "30" # 30th February doesnt exist
+        m = "2"
+        y = "2020"
+        result = CalendarGUI.get_periods(d,m,y)
+        self.assertIn(str(datetime.utcnow().isoformat())[:10], result[0])
+        self.assertIsNone(result[1])
+
 class CalendarGUITestVerifyDate(unittest.TestCase):
 
     def test_verify_date_invalid_length(self):
@@ -1195,98 +1285,9 @@ class CalendarGUITestEnableDeleteReminder(unittest.TestCase):
         event_selected = 1
         self.assertEqual(delete_reminder_btn.configure.call_count, event_selected)
 
-class CalendarGUITestGetPeriods(unittest.TestCase):
-
-    def test_get_periods_specified_day_specified_month_specified_year(self):
-        d = "12"
-        m = "10"  # Month 10 is useless here as we wanted all years
-        y = "2019"
-        result = CalendarGUI.get_periods(d,m,y)
-        start = "2019-10-12" # There are the same as we wanted events for that day
-        end = "2019-10-12"
-        self.assertIn(start, result[0])
-        self.assertIn(end, result[1])
-
-    def test_get_periods_all_day_specified_month_year(self):
-        d = "All"
-        m = "10"
-        y = "2020"
-        result = CalendarGUI.get_periods(d,m,y)
-        start = "2020-10-01"
-        end = "2020-10-31"
-        self.assertIn(start,result[0])
-        self.assertIn(end,result[1])
-
-    def test_get_periods_all_day_all_month_specified_year(self):
-        d = "All"
-        m = "All"
-        y = "2020"
-        result = CalendarGUI.get_periods(d,m,y)
-        start = "2020-01-01"
-        end = "2020-12-31"
-        self.assertIn(start,result[0])
-        self.assertIn(end,result[1])
-
-    def test_get_periods_specified_day_all_month_specified_year(self):
-        d = "12"  # Day 12 is useless here as we wanted all months for 2020
-        m = "All"
-        y = "2020"
-        result = CalendarGUI.get_periods(d,m,y)
-        start = "2020-01-01"
-        end = "2020-12-31"
-        self.assertIn(start,result[0])
-        self.assertIn(end,result[1])
-
-    def test_get_periods_all_day_all_month_all_year(self):
-        d = "All"
-        m = "All"
-        y = "All"
-        result = CalendarGUI.get_periods(d,m,y)
-        self.assertIsNone(result[0])
-        self.assertIsNone(result[1])
-
-    def test_get_periods_specified_day_specified_month__all_year(self):
-        d = "12" # Day 12 and month 12 is useless here as we wanted all years
-        m = "12" # Day 12 and month 12 is useless here as we wanted all years
-        y = "All"
-        result = CalendarGUI.get_periods(d, m, y)
-        self.assertIsNone(result[0])
-        self.assertIsNone(result[1])
-
-    def test_get_periods_specified_day_all_month_all_year(self):
-        d = "12" # Day 12 is useless here as we wanted all months and year
-        m = "All"
-        y = "All"
-        result = CalendarGUI.get_periods(d,m,y)
-        self.assertIsNone(result[0])
-        self.assertIsNone(result[1])
-
-    def test_get_periods_all_day_specified_month_all_year(self):
-        d = "All"
-        m = "10"  # Month 10 is useless here as we wanted all years
-        y = "All"
-        result = CalendarGUI.get_periods(d,m,y)
-        self.assertIsNone(result[0])
-        self.assertIsNone(result[1])
-
-    def test_get_periods_invalid_date_value_error(self):
-        d = "31" # 31st September doesnt exist
-        m = "9"
-        y = "2020"
-        result = CalendarGUI.get_periods(d,m,y)
-        self.assertIn(str(datetime.utcnow().isoformat())[:10], result[0])
-        self.assertIsNone(result[1])
-
-    def test_get_periods_invalid_date_value_error_2(self):
-        d = "30" # 30th February doesnt exist
-        m = "2"
-        y = "2020"
-        result = CalendarGUI.get_periods(d,m,y)
-        self.assertIn(str(datetime.utcnow().isoformat())[:10], result[0])
-        self.assertIsNone(result[1])
 
 
-class CalendarGUITestRunCalendarGUI(unittest.TestCase):
+class CalendarGUITestMain(unittest.TestCase):
 
     def test_main_function(self):
         CalendarGUI.main()
@@ -1295,8 +1296,8 @@ class CalendarGUITestRunCalendarGUI(unittest.TestCase):
 def main():
     # Create the test suite from the cases above.
     test_classes = [CalendarGUITestGetDetailedEvent, CalendarGUITestReloadEventList, CalendarGUITestLoadEventDetails, CalendarGUITestDeleteEvent,
-                    CalendarGUITestDeleteReminder, CalendarGUITestEnableDateTextbox, CalendarGUITestEnablePeriods,
-                    CalendarGUITestVerifyDate, CalendarGUITestEnableDeleteReminder,CalendarGUITestGetPeriods]  # Test Classes
+                    CalendarGUITestDeleteReminder, CalendarGUITestEnableDateTextbox, CalendarGUITestEnablePeriods, CalendarGUITestGetPeriods,
+                    CalendarGUITestVerifyDate, CalendarGUITestEnableDeleteReminder]  # Test Classes
     for classes in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(classes)
         # This will run the test suite.
