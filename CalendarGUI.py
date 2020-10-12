@@ -30,10 +30,7 @@ from google.auth.transport.requests import Request
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 if os.environ.get('DISPLAY', '') == '':
-    os.environ.__setitem__('DISPLAY', ':99')
-
-events = None
-api = None
+    os.environ.__setitem__('DISPLAY', ':0')
 
 
 def get_calendar_api():
@@ -97,16 +94,20 @@ def reload_event_list():
     starting_time = datetime.datetime.utcnow().isoformat() + 'Z'
     end_time = None
 
-    if searchIn.get().lower() != "":
+    if searchIn.get().strip() != "":
         query = searchIn.get()
 
     past_date_tokens = verify_date(dateIn.get())
     if past_only.get() and past_date_tokens:
-        starting_time = datetime.datetime.strptime(
-            past_date_tokens[2] + "-" + past_date_tokens[1] + "-" + past_date_tokens[0],
-            "%Y-%m-%d").isoformat() + ".000000Z"
+        d = past_date_tokens[0]
+        m = past_date_tokens[1]
+        y = past_date_tokens[2]
+        starting_time = datetime.datetime.strptime(y + "-" + m + "-" + d, "%Y-%m-%d").isoformat() + ".000000Z"
     elif specific_only.get():
-        period = get_periods(nav_date.get(), nav_month.get(), nav_year.get())
+        d = nav_date.get()
+        m = nav_month.get()
+        y = nav_year.get()
+        period = get_periods(d, m, y)
         starting_time = period[0]
         end_time = period[1]
 
@@ -115,7 +116,8 @@ def reload_event_list():
 
     eventlist.delete(0, END)
     for i in events:
-        eventlist.insert(END, i["summary"])
+        summary = i["summary"]
+        eventlist.insert(END, summary)
 
     reminderlist.delete(0, END)
     eventdetails.delete(1.0, END)
@@ -126,19 +128,24 @@ def load_event_details(*args):
     idxs = eventlist.curselection()
     if len(idxs) == 1:
         idx = int(idxs[0])
-        text = get_detailed_event(events[idx])
+        event = events[idx]
+        text = get_detailed_event(event)
         eventdetails.delete(1.0, END)
         eventdetails.insert(END, text)
         reminderlist.delete(0, END)
-
-        if events[idx]["reminders"].get("useDefault", False):
-            print(events[idx]["reminders"].get("useDefault", False))
-            reminderlist.insert(END, "Popup 10 minutes before event starts")
+        default = {
+            "useDefault": False,
+            "overrides": []
+        }
+        event_reminders_obj = event.get("reminders", default)
+        if event_reminders_obj.get("useDefault", False):
+            reminderstr = "Popup 10 minutes before event starts"
+            reminderlist.insert(END, reminderstr)
         else:
-            overrides = events[idx]["reminders"].get("overrides", [])
+            overrides = event_reminders_obj.get("overrides", [])
             for each in overrides:
-                reminderlist.insert(END, each.get("method") + " " + str(
-                    each.get("minutes")) + " minutes before event starts")
+                reminderstr = each.get("method") + " " + str(each.get("minutes")) + " minutes before event starts"
+                reminderlist.insert(END, reminderstr)
 
         delete_event_btn.configure(state="normal")
         delete_reminder_btn.configure(state="disable")
@@ -160,17 +167,19 @@ def delete_reminder():
     idxs = reminderlist.curselection()
     if len(idxs) == 1 and selected_event is not None:
         idx = int(idxs[0])
-        if events[selected_event]["reminders"].get("useDefault", False):
-            events[selected_event]['reminders'] = {"useDefault": False, "overrides": []}
+        event = events[selected_event]
+        default_reminder = event["reminders"].get("useDefault", False)
+        if default_reminder:
+            event['reminders'] = {"useDefault": False, "overrides": []}
         else:
-            events[selected_event]['reminders']["overrides"].pop(idx)
-        api.events().update(calendarId='primary', eventId=events[selected_event]['id'],
-                            body=events[selected_event]).execute()
+            event['reminders']["overrides"].pop(idx)
+        api.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
         load_event_details()
 
 
 def enable_date_textbox():
-    if past_only.get():
+    past_events_checked = past_only.get()
+    if past_events_checked :
         dateIn.configure(state="normal")
         specific_only.set(0)
         enable_periods()
@@ -179,7 +188,8 @@ def enable_date_textbox():
 
 
 def enable_periods():
-    if specific_only.get():
+    navigate_event_checked = specific_only.get()
+    if navigate_event_checked:
         nv_date.configure(state="normal")
         nv_month.configure(state="normal")
         nv_year.configure(state="normal")
@@ -205,7 +215,8 @@ def get_periods(date, month, year):
         endmonth = month
         if date == "All":
             date = "1"
-            endday = str(dates_in_month[endmonth])
+            days = dates_in_month[endmonth]
+            endday = str(days)
         else:
             endday = date
 
@@ -233,7 +244,11 @@ def verify_date(string):
     if len(tokens) != 3:
         return False
     try:
-        if int(tokens[0]) in list(range(1, 32)) and int(tokens[1]) in list(range(1, 13)) and int(tokens[2]) > 1900:
+        print(dates[1:])
+        valid_date = tokens[0] in dates[1:]
+        valid_month = tokens[1] in months[1:]
+        valid_year = five_years_ago < int(tokens[2]) < two_years_later
+        if valid_date and valid_month and valid_year :
             return tokens
         else:
             return False
@@ -241,20 +256,23 @@ def verify_date(string):
         return False
 
 
+# def isLeapYear(year):
+#     if (year % 4) == 0:
+#         if (year % 100) == 0:
+#             if (year % 400) == 0:
+#                 return True
+#             else:
+#                 return False
+#         else:
+#             return True
+#     else:
+#         return False
+
+
 def enable_delete_reminder(*args):
     idxs = reminderlist.curselection()
     if len(idxs) == 1:
         delete_reminder_btn.configure(state="normal")
-
-
-root = c = sch = searchIn = searchBtn = eventlist = refreshBtn = delete_event_btn = past_only = checkbtn = dateIn = updateBtn = nv \
-    = specific_only = navigate_checkbtn = nav_date = nv_date = nav_month = nv_month = nav_year = nv_year = eventdetails = reminderlist = \
-    delete_reminder_btn = None
-lbl1 = lbl2 = lbl3 = lbl4 = lbl5 = lbl6 = lbl7 = None
-
-dates = ["All"] + [str(i) for i in range(1, 32)]
-months = ["All"] + [str(i) for i in range(1, 13)]
-years = ["All"] + [str(i) for i in range(int(datetime.datetime.now().year) - 5, int(datetime.datetime.now().year) + 2)]
 
 
 def assign_elements_to_grid():
@@ -287,6 +305,9 @@ def assign_elements_to_grid():
 
 
 def bind_elements_command():
+    nv_date.configure(state="disable")
+    nv_month.configure(state="disable")
+    nv_year.configure(state="disable")
     searchBtn.configure(command=reload_event_list)
     refreshBtn.configure(command=reload_event_list)
     updateBtn.configure(command=reload_event_list)
@@ -299,70 +320,62 @@ def bind_elements_command():
     reminderlist.bind('<<ListboxSelect>>', enable_delete_reminder)
 
 
-c = ttk.Frame(padding=(5, 5, 12, 0))
-# Search Elements
-sch = ttk.Frame(c)
-lbl1 = Label(sch, text="Search events: ")
-searchIn = ttk.Entry(sch, width=50)
-searchBtn = ttk.Button(c, text="Search")
-# Events List Elements
-lbl2 = Label(c, text="Events")
-eventlist = Listbox(c, height=8, exportselection=False)
-refreshBtn = ttk.Button(c, text="Refresh")
-delete_event_btn = ttk.Button(c, text="Delete", state="disable")
-# Show past events elements
-past_only = IntVar()
-checkbtn = Checkbutton(c, text="Show past events since: (DD/MM/YYYY)", variable=past_only)
-dateIn = ttk.Entry(c, state="disabled")
-updateBtn = ttk.Button(c, text="Update")
-# Navigate events elements
-nv = ttk.Frame(c)
-specific_only = IntVar()
-navigate_checkbtn = Checkbutton(nv, variable=specific_only, text="Show only events on: ")
-lbl3 = Label(nv, text="Date")
-nav_date = StringVar()
-nav_date.set(dates[0])
-nv_date = OptionMenu(nv, nav_date, *dates)
-lbl4 = Label(nv, text="Month")
-nav_month = StringVar()
-nav_month.set(months[0])
-nv_month = OptionMenu(nv, nav_month, *months)
-lbl5 = Label(nv, text="Year")
-nav_year = StringVar()
-nav_year.set(years[0])
-nv_year = OptionMenu(nv, nav_year, *years)
-nv_date.configure(state="disable")
-nv_month.configure(state="disable")
-nv_year.configure(state="disable")
-# Event details elements
-lbl6 = Label(c, text="Event Details:")
-eventdetails = Text(c, height=10, width=30)
-# Reminders elements
-lbl7 = Label(c, text="Reminders:")
-reminderlist = Listbox(c, height=8)
-delete_reminder_btn = ttk.Button(c, text="Delete", state="disable")
+events = api = root = c = sch = searchIn = searchBtn = eventlist = refreshBtn = delete_event_btn = past_only = checkbtn = dateIn = updateBtn = nv \
+    = specific_only = navigate_checkbtn = nav_date = nv_date = nav_month = nv_month = nav_year = nv_year = eventdetails = reminderlist = \
+    delete_reminder_btn = None
+lbl1 = lbl2 = lbl3 = lbl4 = lbl5 = lbl6 = lbl7 = None
 
+dates = ["All"] + [str(i) for i in range(1, 32)]
+months = ["All"] + [str(i) for i in range(1, 13)]
+five_years_ago = int(datetime.datetime.now().year) - 5
+two_years_later = int(datetime.datetime.now().year) + 2
+years = ["All"] + [str(i) for i in range(five_years_ago, two_years_later)]
 
-def main():
-    global api, c, sch, searchIn, searchBtn, eventlist, refreshBtn, delete_event_btn, past_only, checkbtn, dateIn, updateBtn, nv, specific_only, \
-        navigate_checkbtn, nav_date, nv_date, nav_month, nv_month, nav_year, nv_year, eventdetails, reminderlist, \
-        delete_reminder_btn, root, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7
-
+if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     api = get_calendar_api()
     # Init and configure eleements
     # Create and grid the outer content frame
     root = Tk()
-    # root.grid_columnconfigure(0, weight=1)
-    # root.grid_rowconfigure(0, weight=1)
+    c = ttk.Frame(root, padding=(5, 5, 12, 0))
+    # Search Elements
+    sch = ttk.Frame(c)
+    lbl1 = Label(sch, text="Search events: ")
+    searchIn = ttk.Entry(sch, width=50)
+    searchBtn = ttk.Button(c, text="Search")
+    # Events List Elements
+    lbl2 = Label(c, text="Events")
+    eventlist = Listbox(c, height=8, exportselection=False)
+    refreshBtn = ttk.Button(c, text="Refresh")
+    delete_event_btn = ttk.Button(c, text="Delete", state="disable")
+    # Show past events elements
+    past_only = IntVar()
+    checkbtn = Checkbutton(c, text="Show past events since: (DD/MM/YYYY)", variable=past_only)
+    dateIn = ttk.Entry(c, state="disabled")
+    updateBtn = ttk.Button(c, text="Update")
+    # Navigate events elements
+    nv = ttk.Frame(c)
+    specific_only = IntVar()
+    navigate_checkbtn = Checkbutton(nv, variable=specific_only, text="Show only events on: ")
+    lbl3 = Label(nv, text="Date")
+    nav_date = StringVar()
+    nav_date.set(dates[0])
+    nv_date = OptionMenu(nv, nav_date, *dates)
+    lbl4 = Label(nv, text="Month")
+    nav_month = StringVar()
+    nav_month.set(months[0])
+    nv_month = OptionMenu(nv, nav_month, *months)
+    lbl5 = Label(nv, text="Year")
+    nav_year = StringVar()
+    nav_year.set(years[0])
+    nv_year = OptionMenu(nv, nav_year, *years)
+    # Event details elements
+    lbl6 = Label(c, text="Event Details:")
+    eventdetails = Text(c, height=10, width=30)
+    # Reminders elements
+    lbl7 = Label(c, text="Reminders:")
+    reminderlist = Listbox(c, height=8)
+    delete_reminder_btn = ttk.Button(c, text="Delete", state="disable")
     assign_elements_to_grid()
     bind_elements_command()
     reload_event_list()
     root.mainloop()
-
-
-if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
-    try:
-        main()
-
-    except KeyboardInterrupt:
-        pass

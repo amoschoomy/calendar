@@ -1252,11 +1252,12 @@ class CalendarGUITestVerifyDate(unittest.TestCase):
         self.assertEqual("30", CalendarGUI.verify_date(datestr)[0])
         self.assertEqual("12", CalendarGUI.verify_date(datestr)[1])
         self.assertEqual("2019", CalendarGUI.verify_date(datestr)[2])
+
+    def test_verify_date_date_out_of_bounds(self):
         datestr = "12.1.1998"
-        self.assertTrue(CalendarGUI.verify_date(datestr))
-        self.assertEqual("12", CalendarGUI.verify_date(datestr)[0])
-        self.assertEqual("1", CalendarGUI.verify_date(datestr)[1])
-        self.assertEqual("1998", CalendarGUI.verify_date(datestr)[2])
+        self.assertFalse(CalendarGUI.verify_date(datestr))
+        datestr = "12.1.2066"
+        self.assertFalse(CalendarGUI.verify_date(datestr))
 
 
 class CalendarGUITestEnableDeleteReminder(unittest.TestCase):
@@ -1333,10 +1334,16 @@ class CalendarGUIUIElementsTest(unittest.TestCase):
     @patch.object(CalendarGUI, 'updateBtn')
     @patch.object(CalendarGUI, 'refreshBtn')
     @patch.object(CalendarGUI, 'searchBtn')
-    def test_bind_elements_command(self, searchBtn, refreshBtn, updateBtn, checkbtn, navigate_checkbtn, delete_event_btn,
+    @patch.object(CalendarGUI, 'nv_year')
+    @patch.object(CalendarGUI, 'nv_month')
+    @patch.object(CalendarGUI, 'nv_date')
+    def test_bind_elements_command(self, nv_date, nv_month, nv_year, searchBtn, refreshBtn, updateBtn, checkbtn, navigate_checkbtn, delete_event_btn,
                                    delete_reminder_btn, eventlist, reminderlist):
 
         CalendarGUI.bind_elements_command()
+        self.assertEqual(nv_date.configure.call_count, 1)
+        self.assertEqual(nv_month.configure.call_count, 1)
+        self.assertEqual(nv_year.configure.call_count, 1)
         self.assertEqual(searchBtn.configure.call_count, 1)
         self.assertEqual(refreshBtn.configure.call_count, 1)
         self.assertEqual(updateBtn.configure.call_count, 1)
