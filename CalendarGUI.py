@@ -160,7 +160,8 @@ def delete_reminder():
             events[selected_event]['reminders'] = {"useDefault": False, "overrides": []}
         else:
             events[selected_event]['reminders']["overrides"].pop(idx)
-        api.events().update(calendarId='primary', eventId=events[selected_event]['id'], body=events[selected_event]).execute()
+        api.events().update(calendarId='primary', eventId=events[selected_event]['id'],
+                            body=events[selected_event]).execute()
         load_event_details()
 
 
@@ -186,38 +187,36 @@ def enable_periods():
         nv_year.configure(state="disable")
 
 
+dates_in_month = {"1": 31,"2": 28,"3": 31,"4": 30,"5": 31,"6": 30,"7": 31,"8": 31,"9": 30,"10": 31,"11": 30,"12": 31, "All":31}
+
+
 def get_periods(date, month, year):
     if month == "All":
         month = "1"
+        date = "1"
         endmonth = "12"
+        endday = "31"
     else:
         endmonth = month
-
-    if date == "All":
-        date = "1"
-        if endmonth in ["1", "3", "5", "7", "8", "10", "12"]:
-            endday = "31"
-        elif endmonth == "2":
-            endday = "28"
+        if date == "All":
+            date = "1"
+            endday = str(dates_in_month[endmonth])
         else:
-            endday = "30"
-    else:
-        endday = date
+            endday = date
 
-    startdate = datetime.datetime.utcnow().isoformat() + 'Z'
-    enddate = None
-
-    try:
-        if year != "All":
+    if year != "All":
+        try:
             startdate = datetime.datetime.strptime(year + "-" + month + "-" + date + " 23:59:59",
                                                    '%Y-%m-%d %H:%M:%S').isoformat() + "Z"
             enddate = datetime.datetime.strptime(year + "-" + endmonth + "-" + endday + " 23:59:59",
                                                  '%Y-%m-%d %H:%M:%S').isoformat() + "Z"
-        else:
-            startdate = None
-    except ValueError:
-        startdate = datetime.datetime.utcnow().isoformat() + 'Z'
+        except ValueError:
+            startdate = datetime.datetime.utcnow().isoformat() + 'Z'
+            enddate = None
+    else:
+        startdate = None
         enddate = None
+
 
     return startdate, enddate
 
@@ -245,6 +244,8 @@ def enable_delete_reminder(*args):
 
 
 def main():
+    global api
+    api = get_calendar_api()
     reload_event_list()
     root.mainloop()
 
@@ -333,7 +334,6 @@ reminderlist.bind('<<ListboxSelect>>', enable_delete_reminder)
 
 if __name__ == "__main__":  # Prevents the main() function from being called by the test suite runner
     try:
-        api = get_calendar_api()
         main()
     except KeyboardInterrupt:
         pass
