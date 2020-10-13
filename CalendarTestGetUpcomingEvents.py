@@ -6,7 +6,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
     # Test Suite for User Story 1
 
     def test_get_upcoming_events_invalid_date(self):
-        """This test for the if statement branch for date validity"""
+        #This test for the if statement branch for date validity
 
         ex_time = "January 1 2020"  # Date is of an invalid date so will throw Value Error
         mock_api = Mock()  # Mock api
@@ -15,12 +15,11 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_events_valid_date(self, api):
-        """This test for the succesful branch of if statement of date validity
-            A patched call to calendar api is mocked
-        """
+        #This test for the succesful branch of if statement of date validity
 
         ex_time = "2020-08-03T00:00:00.000000Z"  # Valid date is given
         events = Calendar.get_upcoming_events(api, ex_time)
+        #Mock api return value of calendar. Will return one event
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -40,7 +39,7 @@ class CalendarTestGetUpcomingEvents(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_get_upcoming_events_non_empty_events(self, api):
-        """This test is to test getting upcoming events but for non empty events(for loop is executed) """
+        #This test is to test getting upcoming events but for non empty events(for loop is executed) """
         ex_time = "2020-10-03T00:00:00.000000Z"
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [

@@ -14,6 +14,8 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
             Calendar.get_detailed_reminders(event)
 
     def test_get_detailed_reminders_path2_two_custom_reminders(self):
+            
+        #below is an example of json string returned
         event = {
             "summary": "test",
             "start": {
@@ -29,8 +31,8 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
                 ], },
         }
         reminders = Calendar.get_detailed_reminders(event)
-        self.assertIn("email 1", reminders)
-        self.assertIn("popup 10", reminders)
+        self.assertIn("email 1", reminders) #Assert reminders detail is returned
+        self.assertIn("popup 10", reminders) #Assert reminders detail is returned
 
     def test_get_detailed_reminders_path3_no_reminder_set(self):
         event = {
@@ -66,6 +68,7 @@ class CalendarTestGetDetailedReminders(unittest.TestCase):
         }
         reminders = Calendar.get_detailed_reminders(event)
         self.assertEqual(reminders, "test,Reminder through popup 10 minutes before event starts\n")
+        #String for default reminders
 
 def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(CalendarTestGetDetailedReminders)

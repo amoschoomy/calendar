@@ -71,6 +71,7 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_navigate_calendar_path4_month_30days(self, api):
+        #navigate through a month of 30 days
         date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
         navigation_type = "MONTH"
         api.events.return_value.list.return_value.execute.return_value = {
@@ -115,6 +116,7 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_navigate_calendar_path5_year(self, api):
+        #navigate through year
         date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
         navigation_type = "YEAR"
         api.events.return_value.list.return_value.execute.return_value = {
@@ -174,6 +176,7 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_navigate_calendar_path6_day(self, api):
+        #navigate through day
         date = datetime.strptime('Jun 10 2020  1:30AM', '%b %d %Y %I:%M%p')
         navigation_type = "DAY"
         api.events.return_value.list.return_value.execute.return_value = {
@@ -218,6 +221,7 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_navigate_calendar_path7_feb_28days(self, api):
+        #navigating in February
         date = datetime.strptime('Feb 28 2017  1:30AM', '%b %d %Y %I:%M%p')
         navigation_type = "MONTH"
         api.events.return_value.list.return_value.execute.return_value = {
@@ -262,6 +266,7 @@ class CalendarTestNavigateCalendar(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_navigate_calendar_path7_feb_29days(self, api):
+        #navigate through feb in leap year
         date = datetime.strptime('Feb 29 2020  1:30AM', '%b %d %Y %I:%M%p')
         navigation_type = "MONTH"
         api.events.return_value.list.return_value.execute.return_value = {

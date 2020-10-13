@@ -7,7 +7,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
     """Test Suite for Getting Past Events"""
 
     def test_get_past_events_invalid_past_date_format(self):
-        """Invalid start date format, branch of date validation throws ValueError executed"""
+        #Invalid start date format, branch of date validation throws ValueError executed"""
 
         past_time = "03 October 2020"
         time_now = "2020-10-03T00:00:00.000000Z"
@@ -16,7 +16,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
             Calendar.get_past_events(api, past_time, time_now)
 
     def test_get_past_events_invalid_end_date_format(self):
-        """Invalid start date format, branch of date validation throws ValueError executed"""
+        #Invalid start date format, branch of date validation throws ValueError executed"""
 
         past_time = "2020-10-03T00:00:00.000000Z"
         time_now = "15 October 2020"
@@ -25,7 +25,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
             Calendar.get_past_events(api, past_time, time_now)
 
     def test_get_past_events_exceeded_date(self):
-        """Past date has exceeded start date, branch of date validation of time comparison executed"""
+        #Past date has exceeded start date, branch of date validation of time comparison executed"""
         past_time = "2020-10-03T00:00:00.000000Z"
         time_now = "2020-01-03T00:00:00.000000Z"
         api = Mock()
@@ -34,7 +34,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_get_past_events_same_date(self, api):
-        """Same date in calendar test, boundary of ending time is the same as past time"""
+        #Same date in calendar test, boundary of ending time is the same as past time"""
         past_time = "2020-10-03T00:00:00.000000Z"
         time_now = "2020-10-03T00:00:00.000000Z"
 
@@ -95,6 +95,7 @@ class CalendarTestGetPastEvents(unittest.TestCase):
 
     @patch("Calendar.get_calendar_api")
     def test_get_past_events_non_empty_events(self, api):
+        #   Test for non empty events
         past_time = "2020-10-03T00:00:00.000000Z"
         time_now = "2020-10-15T00:00:00.000000Z"
         api.events.return_value.list.return_value.execute.return_value = {
