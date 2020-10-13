@@ -15,5 +15,5 @@ test:
   - coverage run -a -m --branch CalendarTestGetUpcomingReminders
   - coverage run -a -m --branch CalendarTestNavigateCalendar
   - coverage run -a -m --branch CalendarTestGetDetailedReminder
-  - coverage report -a -m --branch CalendarTestRunCalendar
+  - coverage run -a -m --branch CalendarTestRunCalendar
   - coverage report
