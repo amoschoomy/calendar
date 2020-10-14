@@ -134,9 +134,6 @@ class CalendarGUITestGetDetailedEvent(unittest.TestCase):
 
 class CalendarGUITestReloadEventList(unittest.TestCase):
 
-    def set_up(self):
-        CalendarGUI.datetime = Mock()
-        CalendarGUI.datetime.datetime.utcnow.return_value.isoformat.return_value = "2020-10-03T02:00:00.000000"
 
     # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
@@ -163,10 +160,10 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
                 {
                     "summary": "test1",
                     "start": {
-                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                        "dateTime": "2021-10-03T02:00:00.000000Z"
                     },
                     "end": {
-                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                        "dateTime": "2021-10-03T02:45:00.000000Z"
                     },
                     "reminders": {
                         "useDefault": False,
@@ -179,10 +176,10 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
                 {
                     "summary": "test2",
                     "start": {
-                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                        "dateTime": "2021-10-03T02:00:00.000000Z"
                     },
                     "end": {
-                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                        "dateTime": "2021-10-03T02:45:00.000000Z"
                     },
                     "reminders": {
                         "useDefault": False,

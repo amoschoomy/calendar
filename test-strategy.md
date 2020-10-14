@@ -66,7 +66,7 @@ To test delete_reminders(), we will use **branch coverage** to test these method
 
 This functionality requires the run_calendar method which requires user input, so mocked input are used. 
 
-We will use **path coverage** is used to cover all possible user input paths and therefore implying 100% branch coverage and 100% statement coverage
+We will use **branch coverage** to cover all possible user input branches and therefore implying 100% statement coverage
 
 **Miscalleanous**
 

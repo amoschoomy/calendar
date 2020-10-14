@@ -18,5 +18,7 @@ test:
   - coverage run -a -m --branch CalendarTestDeleteEvents
   - coverage run -a -m --branch CalendarTestDeleteReminders
   - coverage run -a -m --branch CalendarTestRunCalendar
-  - coverage run -a -m --branch CalendarGUITest
+  - coverage run -a -m --branch CalendarTestGetSelectedEvents
+  - coverage run -a -m --branch CalendarTestGetSelectedReminders
+  - coverage run -a -m --branch CalendarGUITestAll
   - coverage report

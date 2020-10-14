@@ -17,7 +17,7 @@
 <div id="header">
     <div class="content">
         <h1>Coverage report:
-            <span class="pc_cov">95%</span>
+            <span class="pc_cov">96%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <form id="filter_container">
@@ -34,6 +34,8 @@
         <span class="key">s</span>
         <span class="key">m</span>
         <span class="key">x</span>
+        <span class="key">b</span>
+        <span class="key">p</span>
         <span class="key">c</span> &nbsp; change column sorting
     </p>
     </div>
@@ -46,32 +48,184 @@
                 <th class="shortkey_s">statements</th>
                 <th class="shortkey_m">missing</th>
                 <th class="shortkey_x">excluded</th>
+                <th class="shortkey_b">branches</th>
+                <th class="shortkey_p">partial</th>
                 <th class="right shortkey_c">coverage</th>
             </tr>
         </thead>
         <tfoot>
             <tr class="total">
                 <td class="name left">Total</td>
-                <td>928</td>
-                <td>51</td>
+                <td>1998</td>
+                <td>70</td>
                 <td>0</td>
-                <td class="right" data-ratio="877 928">95%</td>
+                <td>212</td>
+                <td>5</td>
+                <td class="right" data-ratio="2123 2210">96%</td>
             </tr>
         </tfoot>
         <tbody>
             <tr class="file">
-                <td class="name left"><a href="CalendarGUI_py.html">CalendarGUI.py</a></td>
-                <td>263</td>
-                <td>51</td>
+                <td class="name left"><a href="Calendar_py.html">Calendar.py</a></td>
+                <td>350</td>
+                <td>17</td>
                 <td>0</td>
-                <td class="right" data-ratio="212 263">81%</td>
+                <td>142</td>
+                <td>3</td>
+                <td class="right" data-ratio="466 492">95%</td>
             </tr>
             <tr class="file">
-                <td class="name left"><a href="CalendarGUITest_py.html">CalendarGUITest.py</a></td>
-                <td>665</td>
+                <td class="name left"><a href="CalendarGUI_py.html">CalendarGUI.py</a></td>
+                <td>264</td>
+                <td>51</td>
+                <td>0</td>
+                <td>64</td>
+                <td>2</td>
+                <td class="right" data-ratio="269 328">82%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarGUITestAll_py.html">CalendarGUITestAll.py</a></td>
+                <td>669</td>
+                <td>2</td>
+                <td>0</td>
+                <td>6</td>
+                <td>0</td>
+                <td class="right" data-ratio="673 675">99%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestDateFormatter_py.html">CalendarTestDateFormatter.py</a></td>
+                <td>32</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="665 665">100%</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="32 32">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestDeleteEvents_py.html">CalendarTestDeleteEvents.py</a></td>
+                <td>26</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="26 26">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestDeleteReminders_py.html">CalendarTestDeleteReminders.py</a></td>
+                <td>37</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="37 37">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetDetailedEvent_py.html">CalendarTestGetDetailedEvent.py</a></td>
+                <td>35</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="35 35">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetDetailedReminder_py.html">CalendarTestGetDetailedReminder.py</a></td>
+                <td>26</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="26 26">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetPastEvents_py.html">CalendarTestGetPastEvents.py</a></td>
+                <td>60</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="60 60">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetPastReminders_py.html">CalendarTestGetPastReminders.py</a></td>
+                <td>60</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="60 60">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetSelectedEvents_py.html">CalendarTestGetSelectedEvents.py</a></td>
+                <td>27</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="27 27">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetSelectedReminders_py.html">CalendarTestGetSelectedReminders.py</a></td>
+                <td>41</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="41 41">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetUpcomingEvents_py.html">CalendarTestGetUpcomingEvents.py</a></td>
+                <td>28</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="28 28">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestGetUpcomingReminders_py.html">CalendarTestGetUpcomingReminders.py</a></td>
+                <td>43</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="43 43">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestNavigateCalendar_py.html">CalendarTestNavigateCalendar.py</a></td>
+                <td>81</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="81 81">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestRunCalendar_py.html">CalendarTestRunCalendar.py</a></td>
+                <td>143</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="143 143">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestSearchEvents_py.html">CalendarTestSearchEvents.py</a></td>
+                <td>34</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="34 34">100%</td>
+            </tr>
+            <tr class="file">
+                <td class="name left"><a href="CalendarTestSearchReminders_py.html">CalendarTestSearchReminders.py</a></td>
+                <td>42</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td class="right" data-ratio="42 42">100%</td>
             </tr>
         </tbody>
     </table>
@@ -83,7 +237,7 @@
     <div class="content">
         <p>
             <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-10-13 04:01 +0800
+            created at 2020-10-15 01:05 +0800
         </p>
     </div>
 </div>

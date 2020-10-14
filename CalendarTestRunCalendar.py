@@ -344,6 +344,36 @@ class CalendarTestRunCalendar(unittest.TestCase):
     @patch("Calendar.get_calendar_api")
     @patch('sys.stdout', new_callable=StringIO)
     @patch('Calendar.input', create=True)
+    def test_run_calendar_navigate_calendar_view_and_delete_event_failed_to_select_event(self, mocked_input, mocked_output, api):
+        mocked_input.side_effect = ["navigate", "0", "23 October 2020", "y", " ", "ab", "0", "23 October 2020", "y",
+                                    " ", "0", "del", "exit"]
+        api.events.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "summary": "COVID",
+                    "id": "test123",
+                    "start": {
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
+                    },
+                    "status": "confirmed",
+                    'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                    'created': '2020-10-09T04:10:47.000Z',
+                    "end": {
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
+                    }, "reminders": {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 1},
+                        {'method': 'popup', 'minutes': 10},
+                    ]}
+                },
+            ]}
+        Calendar.run_calendar(api)
+        self.assertIn("Failure. No event/reminder selected", mocked_output.getvalue())
+
+    @patch("Calendar.get_calendar_api")
+    @patch('sys.stdout', new_callable=StringIO)
+    @patch('Calendar.input', create=True)
     def test_run_calendar_navigate_calendar_view_and_delete_reminders(self, mocked_input, mocked_output, api):
         mocked_input.side_effect = ["navigate", "0", "23 October 2020", "y", " ", "0", "del -r", "0", "exit"]
         api.events.return_value.list.return_value.execute.return_value = {
