@@ -134,6 +134,11 @@ class CalendarGUITestGetDetailedEvent(unittest.TestCase):
 
 class CalendarGUITestReloadEventList(unittest.TestCase):
 
+    def set_up(self):
+        CalendarGUI.datetime = Mock()
+        CalendarGUI.datetime.datetime.utcnow.return_value.isoformat.return_value = "2020-10-03T02:00:00.000000"
+
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -142,26 +147,26 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_normal_upcoming_events(self, searchIn, past, dateIn, specific,
-                                                      ndate, nmonth, nyear, api, eventlist, reminderlist, details,
+    def test_reload_event_list_normal_upcoming_events(self, searchIn, past_checked, dateIn, navigate_checked,
+                                                      nav_date, nav_month, nav_year, api, eventlist, reminderlist, details,
                                                       deleteBtn):
         searchIn.get.return_value = ""
-        past.get.return_value = 0
+        past_checked.get.return_value = 0
         dateIn.return_value = ""
-        specific.get.return_value = 0
+        navigate_checked.get.return_value = 0
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
                     "summary": "test1",
                     "start": {
-                        "dateTime": "2021-10-03T02:00:00.000000Z"
+                        "dateTime": "2020-10-03T02:00:00.000000Z"
                     },
                     "end": {
-                        "dateTime": "2021-10-03T02:45:00.000000Z"
+                        "dateTime": "2020-10-03T02:45:00.000000Z"
                     },
                     "reminders": {
                         "useDefault": False,
@@ -193,14 +198,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
 
         # changes
         self.assertEqual(searchIn.get.call_count, 1)
-        self.assertEqual(specific.get.call_count, 1)
-        self.assertEqual(ndate.call_count, 0)
-        self.assertEqual(nmonth.call_count, 0)
-        self.assertEqual(nyear.call_count, 0)
+        self.assertEqual(navigate_checked.get.call_count, 1)
+        self.assertEqual(nav_date.call_count, 0)
+        self.assertEqual(nav_month.call_count, 0)
+        self.assertEqual(nav_year.call_count, 0)
         self.assertEqual(eventlist.insert.call_count, 2)
 
         # constant
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -208,6 +213,7 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         self.assertEqual(details.delete.call_count, 1)
         self.assertEqual(deleteBtn.configure.call_count, 1)
 
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -216,17 +222,17 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_include_past_events(self, searchIn, past, dateIn, specific, ndate, nmonth, nyear, api,
-                                                   eventlist, reminderlist, details,
-                                                   deleteBtn):
+    def test_reload_event_list_include_past_events(self, searchIn, past_checked, dateIn, navigate_checked, nav_date_input, nav_month_input, nav_year_input, api,
+                                                   eventlist, reminderlist, details, deleteBtn):
+
         searchIn.get.return_value = ""
-        past.get.return_value = 1
-        dateIn.get.return_value = "10/10/2018"
-        specific.get.return_value = 0
+        past_checked.get.return_value = 1
+        dateIn.get.return_value = "1/10/2019"
+        navigate_checked.get.return_value = 0
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -283,14 +289,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
 
         # changes
         self.assertEqual(searchIn.get.call_count, 1)
-        self.assertEqual(specific.get.call_count, 0)
-        self.assertEqual(ndate.get.call_count, 0)
-        self.assertEqual(nmonth.get.call_count, 0)
-        self.assertEqual(nyear.get.call_count, 0)
+        self.assertEqual(navigate_checked.get.call_count, 0)
+        self.assertEqual(nav_date_input.get.call_count, 0)
+        self.assertEqual(nav_month_input.get.call_count, 0)
+        self.assertEqual(nav_year_input.get.call_count, 0)
         self.assertEqual(eventlist.insert.call_count, 3)
 
         # constants
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -298,6 +304,7 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         self.assertEqual(details.delete.call_count, 1)
         self.assertEqual(deleteBtn.configure.call_count, 1)
 
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -306,18 +313,18 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_include_past_events_invalid_past_date(self, searchIn, past, dateIn, specific, ndate,
-                                                                     nmonth, nyear, api,
+    def test_reload_event_list_include_past_events_invalid_past_date(self, searchIn, past_checked, dateIn, navigate_checked, nav_date_input,
+                                                                     nav_month_input, nav_year_input, api,
                                                                      eventlist, reminderlist, details,
                                                                      deleteBtn):
         searchIn.get.return_value = ""
-        past.get.return_value = 1
+        past_checked.get.return_value = 1
         dateIn.get.return_value = "39/15/2980"
-        specific.get.return_value = 0
+        navigate_checked.get.return_value = 0
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -358,14 +365,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
 
         # changes
         self.assertEqual(searchIn.get.call_count, 1)
-        self.assertEqual(specific.get.call_count, 1)
-        self.assertEqual(ndate.get.call_count, 0)
-        self.assertEqual(nmonth.get.call_count, 0)
-        self.assertEqual(nyear.get.call_count, 0)
+        self.assertEqual(navigate_checked.get.call_count, 1)
+        self.assertEqual(nav_date_input.get.call_count, 0)
+        self.assertEqual(nav_month_input.get.call_count, 0)
+        self.assertEqual(nav_year_input.get.call_count, 0)
         self.assertEqual(eventlist.insert.call_count, 2)
 
         # constants
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -373,6 +380,7 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         self.assertEqual(details.delete.call_count, 1)
         self.assertEqual(deleteBtn.configure.call_count, 1)
 
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -381,21 +389,21 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_navigate_specific_events(self, searchIn, past, dateIn, specific, ndate, nmonth, nyear,
+    def test_reload_event_list_navigate_specific_events(self, searchIn, past_checked, dateIn, navigate_checked, nav_date_input, nav_month_input, nav_year_input,
                                                         api,
                                                         eventlist, reminderlist, details,
                                                         deleteBtn):
         searchIn.get.return_value = ""
-        past.get.return_value = 0
+        past_checked.get.return_value = 0
         dateIn.get.return_value = ""
-        specific.get.return_value = 1
-        ndate.get.return_value = "All"
-        nmonth.get.return_value = "10"
-        nyear.get.return_value = "2020"
+        navigate_checked.get.return_value = 1
+        nav_date_input.get.return_value = "All"
+        nav_month_input.get.return_value = "10"
+        nav_year_input.get.return_value = "2020"
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -435,14 +443,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         CalendarGUI.reload_event_list()
         # changes
         self.assertEqual(searchIn.get.call_count, 1)
-        self.assertEqual(specific.get.call_count, 1)
-        self.assertEqual(ndate.get.call_count, 1)
-        self.assertEqual(nmonth.get.call_count, 1)
-        self.assertEqual(nyear.get.call_count, 1)
+        self.assertEqual(navigate_checked.get.call_count, 1)
+        self.assertEqual(nav_date_input.get.call_count, 1)
+        self.assertEqual(nav_month_input.get.call_count, 1)
+        self.assertEqual(nav_year_input.get.call_count, 1)
         self.assertEqual(eventlist.insert.call_count, 2)
 
         # constants
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -450,6 +458,7 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         self.assertEqual(details.delete.call_count, 1)
         self.assertEqual(deleteBtn.configure.call_count, 1)
 
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -458,17 +467,17 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_search_upcoming_events(self, searchIn, past, dateIn, specific,
-                                                      ndate, nmonth, nyear, api, eventlist, reminderlist, details,
+    def test_reload_event_list_search_upcoming_events(self, searchIn, past_checked, dateIn, navigate_checked,
+                                                      nav_date_input, nav_month_input, nav_year_input, api, eventlist, reminderlist, details,
                                                       deleteBtn):
         searchIn.get.return_value = "test"
-        past.get.return_value = 0
+        past_checked.get.return_value = 0
         dateIn.return_value = ""
-        specific.get.return_value = 0
+        navigate_checked.get.return_value = 0
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -509,14 +518,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
 
         # changes
         self.assertEqual(searchIn.get.call_count, 2)
-        self.assertEqual(specific.get.call_count, 1)
-        self.assertEqual(ndate.get.call_count, 0)
-        self.assertEqual(nmonth.get.call_count, 0)
-        self.assertEqual(nyear.get.call_count, 0)
+        self.assertEqual(navigate_checked.get.call_count, 1)
+        self.assertEqual(nav_date_input.get.call_count, 0)
+        self.assertEqual(nav_month_input.get.call_count, 0)
+        self.assertEqual(nav_year_input.get.call_count, 0)
         self.assertEqual(eventlist.insert.call_count, 2)
 
         # constants
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -524,6 +533,7 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         self.assertEqual(details.delete.call_count, 1)
         self.assertEqual(deleteBtn.configure.call_count, 1)
 
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -532,17 +542,17 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_search_past_events(self, searchIn, past, dateIn, specific, ndate, nmonth, nyear, api,
+    def test_reload_event_list_search_past_events(self, searchIn, past_checked, dateIn, navigate_checked, nav_date_input, nav_month_input, nav_year_input, api,
                                                   eventlist, reminderlist, details,
                                                   deleteBtn):
         searchIn.get.return_value = "test3"
-        past.get.return_value = 1
+        past_checked.get.return_value = 1
         dateIn.get.return_value = "10/10/2018"
-        specific.get.return_value = 0
+        navigate_checked.get.return_value = 0
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -567,14 +577,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         CalendarGUI.reload_event_list()
         # changes
         self.assertEqual(searchIn.get.call_count, 2)
-        self.assertEqual(specific.get.call_count, 0)
-        self.assertEqual(ndate.get.call_count, 0)
-        self.assertEqual(nmonth.get.call_count, 0)
-        self.assertEqual(nyear.get.call_count, 0)
+        self.assertEqual(navigate_checked.get.call_count, 0)
+        self.assertEqual(nav_date_input.get.call_count, 0)
+        self.assertEqual(nav_month_input.get.call_count, 0)
+        self.assertEqual(nav_year_input.get.call_count, 0)
         self.assertEqual(eventlist.insert.call_count, 1)
 
         # constants
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -582,6 +592,7 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         self.assertEqual(details.delete.call_count, 1)
         self.assertEqual(deleteBtn.configure.call_count, 1)
 
+    # These are each of the UI elements
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
@@ -590,20 +601,20 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
     @patch.object(CalendarGUI, 'nav_year')
     @patch.object(CalendarGUI, 'nav_month')
     @patch.object(CalendarGUI, 'nav_date')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'searchIn')
-    def test_reload_event_list_search_in_navigated_events(self, searchIn, past, dateIn, specific, ndate, nmonth, nyear,
+    def test_reload_event_list_search_in_navigated_events(self, searchIn, past_checked, dateIn, navigate_checked, nav_date_input, nav_month_input, nav_year_input,
                                                           api,
                                                           eventlist, reminderlist, details, deleteBtn):
         searchIn.get.return_value = "test2"
-        past.get.return_value = 0
+        past_checked.get.return_value = 0
         dateIn.get.return_value = ""
-        specific.get.return_value = 1
-        ndate.get.return_value = "All"
-        nmonth.get.return_value = "10"
-        nyear.get.return_value = "2020"
+        navigate_checked.get.return_value = 1
+        nav_date_input.get.return_value = "All"
+        nav_month_input.get.return_value = "10"
+        nav_year_input.get.return_value = "2020"
         api.events.return_value.list.return_value.execute.return_value = {
             "items": [
                 {
@@ -627,14 +638,14 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
         CalendarGUI.reload_event_list()
         # changes
         self.assertEqual(searchIn.get.call_count, 2)
-        self.assertEqual(specific.get.call_count, 1)
-        self.assertEqual(ndate.get.call_count, 1)
-        self.assertEqual(nmonth.get.call_count, 1)
-        self.assertEqual(nyear.get.call_count, 1)
+        self.assertEqual(navigate_checked.get.call_count, 1)
+        self.assertEqual(nav_date_input.get.call_count, 1)
+        self.assertEqual(nav_month_input.get.call_count, 1)
+        self.assertEqual(nav_year_input.get.call_count, 1)
         self.assertEqual(eventlist.insert.call_count, 1)
 
         # constants
-        self.assertEqual(past.get.call_count, 1)
+        self.assertEqual(past_checked.get.call_count, 1)
         self.assertEqual(dateIn.get.call_count, 1)
         self.assertEqual(api.events.return_value.list.return_value.execute.call_count, 1)
         self.assertEqual(eventlist.delete.call_count, 1)
@@ -645,16 +656,30 @@ class CalendarGUITestReloadEventList(unittest.TestCase):
 
 class CalendarGUITestLoadEventDetails(unittest.TestCase):
 
-    @patch.object(CalendarGUI, 'delete_reminder_btn')
-    @patch.object(CalendarGUI, 'delete_event_btn')
-    @patch.object(CalendarGUI, 'eventdetails')
-    @patch.object(CalendarGUI, 'reminderlist')
-    @patch.object(CalendarGUI, 'eventlist')
-    @patch.object(CalendarGUI, 'events')
-    def test_load_event_details_no_selection(self, events, eventlist, reminderlist, details, deleteBtn,
-                                             deleteReminderBtn):
-        eventlist.curselection.return_value = []
-        events.get.return_value = [{
+    def set_up(self):
+        CalendarGUI.events = [
+            {
+                "summary": "test2",
+                "start": {
+                    "dateTime": "2020-10-03T02:00:00.000000Z"
+                },
+                "end": {
+                    "dateTime": "2020-10-03T02:45:00.000000Z"
+                },
+                "status": "confirmed",
+                'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+                'created': '2020-10-09T04:10:47.000Z',
+                'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
+                              {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
+                "reminders": {
+                    "useDefault": False,
+                    "overrides": [
+                        {"method": "email", "minutes": 1},
+                        {"method": "popup", "minutes": 10}
+                    ]
+                }
+            },
+            {
             "summary": "test2",
             "start": {
                 "dateTime": "2020-10-03T02:00:00.000000Z"
@@ -662,8 +687,13 @@ class CalendarGUITestLoadEventDetails(unittest.TestCase):
             "end": {
                 "dateTime": "2020-10-03T02:45:00.000000Z"
             },
+            "status": "confirmed",
+            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
+            'created': '2020-10-09T04:10:47.000Z',
+            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
+                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
             "reminders": {
-                "useDefault": False,
+                "useDefault": True,
                 "overrides": [
                     {"method": "email", "minutes": 1},
                     {"method": "popup", "minutes": 10}
@@ -671,6 +701,15 @@ class CalendarGUITestLoadEventDetails(unittest.TestCase):
             }
         }
         ]
+
+    @patch.object(CalendarGUI, 'delete_reminder_btn')
+    @patch.object(CalendarGUI, 'delete_event_btn')
+    @patch.object(CalendarGUI, 'eventdetails')
+    @patch.object(CalendarGUI, 'reminderlist')
+    @patch.object(CalendarGUI, 'eventlist')
+    def test_load_event_details_no_selection(self, eventlist, reminderlist, details, deleteBtn, deleteReminderBtn):
+        self.set_up()
+        eventlist.curselection.return_value = []
         CalendarGUI.load_event_details()
 
         # constant
@@ -692,29 +731,8 @@ class CalendarGUITestLoadEventDetails(unittest.TestCase):
     @patch.object(CalendarGUI, 'reminderlist')
     @patch.object(CalendarGUI, 'eventlist')
     def test_load_event_details_has_selection(self, eventlist, reminderlist, details, deleteBtn, deleteReminderBtn):
+        self.set_up()
         eventlist.curselection.return_value = ["0"]
-        CalendarGUI.events = [{
-            "summary": "test2",
-            "start": {
-                "dateTime": "2020-10-03T02:00:00.000000Z"
-            },
-            "end": {
-                "dateTime": "2020-10-03T02:45:00.000000Z"
-            },
-            "status": "confirmed",
-            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
-            'created': '2020-10-09T04:10:47.000Z',
-            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
-                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
-            "reminders": {
-                "useDefault": False,
-                "overrides": [
-                    {"method": "email", "minutes": 1},
-                    {"method": "popup", "minutes": 10}
-                ]
-            }
-        }
-        ]
         CalendarGUI.load_event_details()
 
         # constant
@@ -737,29 +755,8 @@ class CalendarGUITestLoadEventDetails(unittest.TestCase):
     @patch.object(CalendarGUI, 'eventlist')
     def test_load_event_details_has_selection_default_reminder(self, eventlist, reminderlist, details, deleteBtn,
                                                                deleteReminderBtn):
-        eventlist.curselection.return_value = ["0"]
-        CalendarGUI.events = [{
-            "summary": "test2",
-            "start": {
-                "dateTime": "2020-10-03T02:00:00.000000Z"
-            },
-            "end": {
-                "dateTime": "2020-10-03T02:45:00.000000Z"
-            },
-            "status": "confirmed",
-            'creator': {'email': 'donaldtrump@gmail.com', 'self': True},
-            'created': '2020-10-09T04:10:47.000Z',
-            'attendees': [{'email': 'trump@monash.edu', 'responseStatus': 'needsAction'},
-                          {'email': 'donald@monash.edu', 'responseStatus': 'needsAction'}],
-            "reminders": {
-                "useDefault": True,
-                "overrides": [
-                    {"method": "email", "minutes": 1},
-                    {"method": "popup", "minutes": 10}
-                ]
-            }
-        }
-        ]
+        self.set_up()
+        eventlist.curselection.return_value = ["1"]
         CalendarGUI.load_event_details()
 
         # constant
@@ -1037,27 +1034,27 @@ class CalendarGUITestDeleteReminder(unittest.TestCase):
 
 class CalendarGUITestEnableDateTextbox(unittest.TestCase):
 
-    @patch.object(CalendarGUI, 'specific_only')
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'dateIn')
     @patch.object(CalendarGUI, 'enable_periods')
-    def test_enable_date_textbox_show_past_events_checked(self, periods, dateIn, past, specific):
+    def test_enable_date_textbox_show_past_events_checked(self, periods, dateIn, past_checked, navigate_checked):
 
-        past.get.return_value = 1
+        past_checked.get.return_value = 1
         CalendarGUI.enable_date_textbox()
 
         # constant
         self.assertEqual(dateIn.configure.call_count, 1)
 
         # changes
-        self.assertEqual(specific.set.call_count, 1)
+        self.assertEqual(navigate_checked.set.call_count, 1)
         self.assertEqual(periods.call_count, 1)
 
-    @patch.object(CalendarGUI, 'past_only')
+    @patch.object(CalendarGUI, 'past_checked')
     @patch.object(CalendarGUI, 'dateIn')
     @patch.object(CalendarGUI, 'enable_periods')
-    def test_enable_date_textbox_show_past_events_not_checked(self, periods, dateIn, past):
-        past.get.return_value = 0
+    def test_enable_date_textbox_show_past_events_not_checked(self, periods, dateIn, past_checked):
+        past_checked.get.return_value = 0
         CalendarGUI.enable_date_textbox()
 
         # constant
@@ -1068,38 +1065,38 @@ class CalendarGUITestEnableDateTextbox(unittest.TestCase):
 
 class CalendarGUITestEnablePeriods(unittest.TestCase):
 
-    @patch.object(CalendarGUI, 'past_only')
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'past_checked')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'enable_date_textbox')
-    @patch.object(CalendarGUI, 'nv_year')
-    @patch.object(CalendarGUI, 'nv_month')
-    @patch.object(CalendarGUI, 'nv_date')
-    def test_enable_date_textbox_show_specific_events_checked(self, ndate, nmonth, nyear, enable_date, specific, past):
-        specific.get.return_value = 1
+    @patch.object(CalendarGUI, 'nav_year_input')
+    @patch.object(CalendarGUI, 'nav_month_input')
+    @patch.object(CalendarGUI, 'nav_date_input')
+    def test_enable_date_textbox_show_specific_events_checked(self, nav_date_input, nav_month_input, nav_year_input, enable_date, navigate_checked, past_checked):
+        navigate_checked.get.return_value = 1
         CalendarGUI.enable_periods()
 
         # constant
-        self.assertEqual(ndate.configure.call_count, 1)
-        self.assertEqual(nmonth.configure.call_count, 1)
-        self.assertEqual(nyear.configure.call_count, 1)
+        self.assertEqual(nav_date_input.configure.call_count, 1)
+        self.assertEqual(nav_month_input.configure.call_count, 1)
+        self.assertEqual(nav_year_input.configure.call_count, 1)
 
         # changes
-        self.assertEqual(past.set.call_count, 1)
+        self.assertEqual(past_checked.set.call_count, 1)
         self.assertEqual(enable_date.call_count, 1)
 
-    @patch.object(CalendarGUI, 'specific_only')
+    @patch.object(CalendarGUI, 'navigate_checked')
     @patch.object(CalendarGUI, 'enable_date_textbox')
-    @patch.object(CalendarGUI, 'nv_year')
-    @patch.object(CalendarGUI, 'nv_month')
-    @patch.object(CalendarGUI, 'nv_date')
-    def test_enable_date_textbox_show_specific_events_not_checked(self, ndate, nmonth, nyear, enable_date, specific):
-        specific.get.return_value = 0
+    @patch.object(CalendarGUI, 'nav_year_input')
+    @patch.object(CalendarGUI, 'nav_month_input')
+    @patch.object(CalendarGUI, 'nav_date_input')
+    def test_enable_date_textbox_show_specific_events_not_checked(self, nav_date_input, nav_month_input, nav_year_input, enable_date, navigate_checked):
+        navigate_checked.get.return_value = 0
         CalendarGUI.enable_periods()
 
         # constant
-        self.assertEqual(ndate.configure.call_count, 1)
-        self.assertEqual(nmonth.configure.call_count, 1)
-        self.assertEqual(nyear.configure.call_count, 1)
+        self.assertEqual(nav_date_input.configure.call_count, 1)
+        self.assertEqual(nav_month_input.configure.call_count, 1)
+        self.assertEqual(nav_year_input.configure.call_count, 1)
 
         # changes
         self.assertEqual(enable_date.call_count, 0)
@@ -1299,13 +1296,13 @@ class CalendarGUIUIElementsTest(unittest.TestCase):
     @patch.object(CalendarGUI, 'refreshBtn')
     @patch.object(CalendarGUI, 'delete_event_btn')
     @patch.object(CalendarGUI, 'dateIn')
-    @patch.object(CalendarGUI, 'checkbtn')
+    @patch.object(CalendarGUI, 'past_checkbox')
     @patch.object(CalendarGUI, 'updateBtn')
     @patch.object(CalendarGUI, 'nv')
-    @patch.object(CalendarGUI, 'navigate_checkbtn')
-    @patch.object(CalendarGUI, 'nv_date')
-    @patch.object(CalendarGUI, 'nv_month')
-    @patch.object(CalendarGUI, 'nv_year')
+    @patch.object(CalendarGUI, 'navigate_checkbox')
+    @patch.object(CalendarGUI, 'nav_date_input')
+    @patch.object(CalendarGUI, 'nav_month_input')
+    @patch.object(CalendarGUI, 'nav_year_input')
     @patch.object(CalendarGUI, 'eventdetails')
     @patch.object(CalendarGUI, 'reminderlist')
     @patch.object(CalendarGUI, 'delete_reminder_btn')
@@ -1316,8 +1313,8 @@ class CalendarGUIUIElementsTest(unittest.TestCase):
     @patch.object(CalendarGUI, 'lbl5')
     @patch.object(CalendarGUI, 'lbl6')
     @patch.object(CalendarGUI, 'lbl7')
-    def test_assign_elements_to_grid(self, c, sch, searchIn, searchBtn, eventlist, refreshBtn, delete_event_btn, checkbtn, dateIn, updateBtn, nv, \
-        navigate_checkbtn, nv_date, nv_month,nv_year, eventdetails, reminderlist, delete_reminder_btn, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7):
+    def test_assign_elements_to_grid(self, c, sch, searchIn, searchBtn, eventlist, refreshBtn, delete_event_btn, past_checkbox, dateIn, updateBtn, nv, \
+        navigate_checkbox, nav_date_input, nav_month_input,nav_year_input, eventdetails, reminderlist, delete_reminder_btn, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7):
         CalendarGUI.assign_elements_to_grid()
         elements = locals()
         for i in elements:
@@ -1329,26 +1326,26 @@ class CalendarGUIUIElementsTest(unittest.TestCase):
     @patch.object(CalendarGUI, 'eventlist')
     @patch.object(CalendarGUI, 'delete_reminder_btn')
     @patch.object(CalendarGUI, 'delete_event_btn')
-    @patch.object(CalendarGUI, 'navigate_checkbtn')
-    @patch.object(CalendarGUI, 'checkbtn')
+    @patch.object(CalendarGUI, 'navigate_checkbox')
+    @patch.object(CalendarGUI, 'past_checkbox')
     @patch.object(CalendarGUI, 'updateBtn')
     @patch.object(CalendarGUI, 'refreshBtn')
     @patch.object(CalendarGUI, 'searchBtn')
-    @patch.object(CalendarGUI, 'nv_year')
-    @patch.object(CalendarGUI, 'nv_month')
-    @patch.object(CalendarGUI, 'nv_date')
-    def test_bind_elements_command(self, nv_date, nv_month, nv_year, searchBtn, refreshBtn, updateBtn, checkbtn, navigate_checkbtn, delete_event_btn,
+    @patch.object(CalendarGUI, 'nav_year_input')
+    @patch.object(CalendarGUI, 'nav_month_input')
+    @patch.object(CalendarGUI, 'nav_date_input')
+    def test_bind_elements_command(self, nav_date_input, nav_month_input, nav_year_input, searchBtn, refreshBtn, updateBtn, past_checkbox, navigate_checkbox, delete_event_btn,
                                    delete_reminder_btn, eventlist, reminderlist):
 
         CalendarGUI.bind_elements_command()
-        self.assertEqual(nv_date.configure.call_count, 1)
-        self.assertEqual(nv_month.configure.call_count, 1)
-        self.assertEqual(nv_year.configure.call_count, 1)
+        self.assertEqual(nav_date_input.configure.call_count, 1)
+        self.assertEqual(nav_month_input.configure.call_count, 1)
+        self.assertEqual(nav_year_input.configure.call_count, 1)
         self.assertEqual(searchBtn.configure.call_count, 1)
         self.assertEqual(refreshBtn.configure.call_count, 1)
         self.assertEqual(updateBtn.configure.call_count, 1)
-        self.assertEqual(checkbtn.configure.call_count, 1)
-        self.assertEqual(navigate_checkbtn.configure.call_count, 1)
+        self.assertEqual(past_checkbox.configure.call_count, 1)
+        self.assertEqual(navigate_checkbox.configure.call_count, 1)
         self.assertEqual(delete_event_btn.configure.call_count, 1)
         self.assertEqual(delete_reminder_btn.configure.call_count, 1)
         self.assertEqual(eventlist.bind.call_count, 1)
