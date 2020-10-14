@@ -1,6 +1,10 @@
 # Test Strategy for Functionalties of Calendar.py
 
-Note: This test suite assumes that the Google Calendar API is thoroughly tested and does not contain any bugs/errors, mocking is used whenever we require any calls to the google calendar API
+Note #1: This test suite assumes that the Google Calendar API is thoroughly tested and does not contain any bugs/errors.
+
+Note #2: Mocking is used whenever we require any calls to the Google Calendar API and when requiring user inputs
+
+Note #3: We have both a CLI and a GUI, this test suite is for the CLI, to see test strategies for the GUI see test-strategy-GUI.md
 
 **Strategy for Viewing Upcoming Events**
 

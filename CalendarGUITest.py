@@ -1352,14 +1352,6 @@ class CalendarGUIUIElementsTest(unittest.TestCase):
         self.assertEqual(reminderlist.bind.call_count, 1)
 
 
-
-#
-# class CalendarGUITestMain(unittest.TestCase):
-#
-#     def test_main_function(self):
-#         CalendarGUI.main()
-
-
 def main():
     # Create the test suite from the cases above.
     test_classes = [CalendarGUITestGetDetailedEvent, CalendarGUITestReloadEventList, CalendarGUITestLoadEventDetails, CalendarGUITestDeleteEvent,

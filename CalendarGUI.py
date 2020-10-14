@@ -177,28 +177,6 @@ def delete_reminder():
         load_event_details()
 
 
-def enable_date_textbox():
-    past_events_checked = past_checked.get()
-    if past_events_checked :
-        dateIn.configure(state="normal")
-        navigate_checked.set(0)
-        enable_periods()
-    else:
-        dateIn.configure(state="disable")
-
-
-def enable_periods():
-    navigate_event_checked = navigate_checked.get()
-    if navigate_event_checked:
-        nav_date_input.configure(state="normal")
-        nav_month_input.configure(state="normal")
-        nav_year_input.configure(state="normal")
-        past_checked.set(0)
-        enable_date_textbox()
-    else:
-        nav_date_input.configure(state="disable")
-        nav_month_input.configure(state="disable")
-        nav_year_input.configure(state="disable")
 
 
 dates_in_month = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31, "6": 30, "7": 31, "8": 31, "9": 30, "10": 31, "11": 30,
@@ -253,6 +231,30 @@ def verify_date(string):
             return False
     except ValueError:
         return False
+
+
+def enable_date_textbox():
+    past_events_checked = past_checked.get()
+    if past_events_checked :
+        dateIn.configure(state="normal")
+        navigate_checked.set(0)
+        enable_periods()
+    else:
+        dateIn.configure(state="disable")
+
+
+def enable_periods():
+    navigate_event_checked = navigate_checked.get()
+    if navigate_event_checked:
+        nav_date_input.configure(state="normal")
+        nav_month_input.configure(state="normal")
+        nav_year_input.configure(state="normal")
+        past_checked.set(0)
+        enable_date_textbox()
+    else:
+        nav_date_input.configure(state="disable")
+        nav_month_input.configure(state="disable")
+        nav_year_input.configure(state="disable")
 
 
 def enable_delete_reminder(*args):
