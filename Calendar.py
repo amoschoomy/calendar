@@ -374,8 +374,6 @@ def run_calendar(api):
         elif command == "search -r":
             query = input("Enter search query: ")
             print(get_searched_reminders(api, query))
-
-
         elif command == "navigate":
             nav_type = ["MONTH", "DAY", "YEAR"]
             while True:
@@ -386,11 +384,11 @@ def run_calendar(api):
                     nav = int(input())
                     if not (nav in [0,1,2]):
                         raise ValueError
-                    nav_date = input("Enter date of navigation in DD M YYYY where M is the month name in full format: ")
+                    nav_date = input("Enter date of navigation exactly in DD Month YYYY format(eg. 21 January 2020): ")
                     date_inputted = datetime.datetime.strptime(nav_date, '%d %B %Y')
                     date = date_formatter(date_inputted, nav_type[nav])
                     print(navigate_calendar(api, date, nav_type[nav]))
-                    decision = input("View? y/n \n")
+                    decision = input("View Event? y/n \n")
                     if decision == "y":
                         event = input("Input full name of the event: ")
                         events = api.events().list(calendarId='primary', singleEvents=True, orderBy='startTime',
@@ -427,7 +425,7 @@ def run_calendar(api):
                 print(directive)
             print("-e is for events, while -r is for reminders")
             print("\n")
-            print("Contact devs at acho0057@student.monash.edu for further help")
+            print("Contact devs at acho0057@student.monash.edu and apan0027@student.monash.edu for further help")
         elif command == "exit":
             break
 

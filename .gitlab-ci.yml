@@ -5,8 +5,6 @@ test:
   - pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
   - pip install coverage
   - pip install tk
-  - python CalendarGUITest.py
-  - coverage run -a -m --branch CalendarGUITest
   - coverage run -a -m --branch CalendarTestDateFormatter
   - coverage run -a -m --branch CalendarTestGetDetailedEvent
   - coverage run -a -m --branch CalendarTestGetPastEvents
@@ -15,5 +13,10 @@ test:
   - coverage run -a -m --branch CalendarTestGetUpcomingReminders
   - coverage run -a -m --branch CalendarTestNavigateCalendar
   - coverage run -a -m --branch CalendarTestGetDetailedReminder
+  - coverage run -a -m --branch CalendarTestSearchEvents
+  - coverage run -a -m --branch CalendarTestSearchReminders
+  - coverage run -a -m --branch CalendarTestDeleteEvents
+  - coverage run -a -m --branch CalendarTestDeleteReminders
   - coverage run -a -m --branch CalendarTestRunCalendar
+  - coverage run -a -m --branch CalendarGUITest
   - coverage report
