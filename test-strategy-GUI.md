@@ -7,6 +7,8 @@ Note #3: We have both a CLI (Calendar.py) and a GUI (CalendarGUI.py), this test 
 
 Note #4: All tests for the GUI are in the file CalendarGUITestAll.py, with each class in the file reperesenting a method under test.
 
+Note #5: You can run the batch file runcoverage.py to run all the tests and generate a coverage html file
+
 #**Strategies for Viewing a List Of Events**
 
 This functionality is done using the **reload_event_list** method.-

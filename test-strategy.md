@@ -8,6 +8,8 @@ Note #3: We have both a CLI (Calendar.py) and a GUI (CalendarGUI.py), this test 
 
 Note #4: Each file with the filename CalendarTest<method_name> contains the tests for each method in the CLI
 
+Note #5: You can run the batch file runcoverage.py to run all the tests and generate a coverage html file
+
 **Strategy for Viewing Upcoming Events**
 
 This functionality is done through the get_upcoming_events method therefore we will test that method.
