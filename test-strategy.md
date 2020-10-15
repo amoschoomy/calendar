@@ -53,7 +53,7 @@ Overall there are 6 test cases for the method get_detailed_event
 
 This functionality is done through two methods, namely get_searched_events() and get_searched_reminders() methods, we will test these methods.
 
-To test get_searched_events(), we will use **path coverage** to test this method since they are 3 visible branches and a for loop. the first 2 branches checks for invalid queries and the last branch is the for loop which may not run. We derived 4 test cases from here that can test all possible paths, implying 100% branch and statement coverage.
+To test get_searched_events(), we will use **path coverage** to test this method. There are 3 visible branches and a for loop. the first 2 branches checks for invalid queries and the last branch is the for loop which may not run. We derived 4 test cases from here that can test all possible paths, implying 100% branch and statement coverage.
 
 To test get_searched_reminders(), we wil use **path coverage** as well. There are 4 visible branches, 2 of which are nested inside a for loop. The first 2 branch checks for invalid queries, and the last 2 branch are in the for loop which may not run. We derived 5 test cases so that that can test all possible paths, implying 100% branch and statement coverage.
 
