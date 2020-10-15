@@ -1,3 +1,4 @@
+#**Test Strategies for Functionality of CalendarGUI.py**
 Note #1: This test suite assumes that the Google Calendar API is thoroughly tested and does not contain any bugs/errors.
 
 Note #2: Mocking is used whenever we require any calls to the Google Calendar API and when requiring user inputs

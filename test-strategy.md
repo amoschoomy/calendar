@@ -1,4 +1,4 @@
-# Test Strategy for Functionalties of Calendar.py
+# Test Strategy for Functionality of Calendar.py
 
 Note #1: This test suite assumes that the Google Calendar API is thoroughly tested and does not contain any bugs/errors.
 
