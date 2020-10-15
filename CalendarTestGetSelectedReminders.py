@@ -3,6 +3,9 @@ from unittest.mock import Mock, patch
 import Calendar
 from io import StringIO
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_selected_reminder METHOD IN Calendar.py
+# Test Strategy : Path Coverage
+
 class CalendarTestGetSelectedReminders(unittest.TestCase):
 
     @patch('sys.stdout', new_callable=StringIO)

@@ -3,6 +3,10 @@ import unittest
 from unittest.mock import Mock, patch
 import Calendar
 
+
+# NOTE: ALL THE TESTS HERE ARE FOR THE navigate_calendar METHOD IN Calendar.py
+# Test Strategy : Path Coverage
+
 class CalendarTestNavigateCalendar(unittest.TestCase):
     @patch("Calendar.get_calendar_api")
     def test_navigate_calendar_path1_invalid_date_format(self, api):

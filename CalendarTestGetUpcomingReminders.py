@@ -2,6 +2,10 @@ from datetime import datetime
 import unittest
 from unittest.mock import Mock, patch
 import Calendar
+
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_upcoming_reminders METHOD IN Calendar.py
+# Test Strategy : Path Coverage
+
 class CalendarTestGetUpcomingReminders(unittest.TestCase):
     def test_get_upcoming_reminders_invalid_date(self):
         # Path 1 where execution stops after invalid date given

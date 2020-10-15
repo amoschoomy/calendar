@@ -2,6 +2,8 @@ import unittest
 from unittest.mock import Mock, patch
 import Calendar
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE delete_reminders METHOD IN Calendar.py
+# Test Strategy : Branch Coverage
 
 class CalendarTestDeleteReminders(unittest.TestCase):
 

@@ -2,6 +2,8 @@ import unittest
 from unittest.mock import Mock, patch
 import Calendar
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_selected_events METHOD IN Calendar.py
+# Test Strategy : Path Coverage
 
 class CalendarTestGetSelectedEvents(unittest.TestCase):
 

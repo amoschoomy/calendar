@@ -3,6 +3,10 @@ import unittest
 from unittest.mock import Mock, patch
 import Calendar
 
+
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_past_events METHOD IN Calendar.py
+# Test Strategy : Branch Coverage
+
 class CalendarTestGetPastEvents(unittest.TestCase):
     """Test Suite for Getting Past Events"""
 

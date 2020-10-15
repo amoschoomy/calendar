@@ -1,7 +1,11 @@
 from datetime import datetime
 import unittest
-from unittest.mock import Mock, patch
 import Calendar
+
+
+# NOTE: ALL THE TESTS HERE ARE FOR THE date_formatter METHOD IN Calendar.py
+# Test Strategy : Branch Coverage
+
 class CalendarTestDateFormatter(unittest.TestCase):
     def test_date_formatter_invalid_date(self):
         date = "15 October 2020"

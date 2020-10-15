@@ -61,7 +61,9 @@ This is by 2 methods get_detailed_events and load_event_details
 
 **get_detailed_events** decodes the event object retrieved from the API and converts it to a paragraph of legible texts
 
-To test get_detailed_events, we use **path coverage** because some events may contain certain attributes that some events don't. (eg. guests and location)
+To test get_detailed_events, we use **MC/DC coverage** because some events may contain certain attributes that some events don't. (eg. guests and location)
+
+Therefore we can reduce the number of redundant test cases using MC/DC Coverage.
 
 **load_event_details** then displays the details of the event on the main GUI and enables the delete buton to delete the event. It also inserts all the reminders that the event has into a reminder list as well
 

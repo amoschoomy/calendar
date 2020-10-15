@@ -2,6 +2,10 @@ from datetime import datetime
 import unittest
 from unittest.mock import Mock, patch
 import Calendar
+
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_upcoming_events METHOD IN Calendar.py
+# Test Strategy : Branch Coverage
+
 class CalendarTestGetUpcomingEvents(unittest.TestCase):
     # Test Suite for User Story 1
 

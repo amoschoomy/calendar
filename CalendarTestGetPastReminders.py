@@ -3,6 +3,9 @@ import unittest
 from unittest.mock import Mock, patch
 import Calendar
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_past_reminders METHOD IN Calendar.py
+# Test Strategy : Path Coverage
+
 class CalendarTestGetPastReminders(unittest.TestCase):
     @patch("Calendar.get_calendar_api")
     def test_get_past_reminders_path1_starttime_wrong_format(self, api):

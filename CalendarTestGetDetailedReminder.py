@@ -3,6 +3,8 @@ import unittest
 from unittest.mock import Mock, patch
 import Calendar
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE get_detailed_remidner METHOD IN Calendar.py
+# Test Strategy : Branch Coverage
 
 class CalendarTestGetDetailedReminders(unittest.TestCase):
     def test_get_detailed_reminders_raise_value_error(self):

@@ -4,6 +4,8 @@ from unittest.mock import Mock, patch
 import Calendar
 from io import StringIO
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE run_calendar METHOD IN Calendar.py
+# Test Strategy : Branch Coverage
 
 class CalendarTestRunCalendar(unittest.TestCase):
 
