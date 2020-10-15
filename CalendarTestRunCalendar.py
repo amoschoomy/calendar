@@ -7,7 +7,6 @@ from io import StringIO
 
 class CalendarTestRunCalendar(unittest.TestCase):
 
-
     @patch("Calendar.get_calendar_api")
     @patch('sys.stdout', new_callable=StringIO)
     @patch('Calendar.input', create=True)

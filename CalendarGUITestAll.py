@@ -3,6 +3,9 @@ import unittest
 from unittest.mock import Mock, patch
 import CalendarGUI
 
+# NOTE: ALL THE TESTS HERE ARE FOR THE GUI
+# EACH CLASS INDICATE A FUNCTION IN CalendarGUI.py
+
 class CalendarGUITestGetDetailedEvent(unittest.TestCase):
 
     def test_get_detailed_event_raise_value_error(self):

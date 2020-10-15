@@ -1,6 +1,14 @@
+Note #1: This test suite assumes that the Google Calendar API is thoroughly tested and does not contain any bugs/errors.
+
+Note #2: Mocking is used whenever we require any calls to the Google Calendar API and when requiring user inputs
+
+Note #3: We have both a CLI (Calendar.py) and a GUI (CalendarGUI.py), this test suite is for the GUI, to see test strategies for the GUI see test-strategy.md
+
+Note #4: All tests for the GUI are in the file CalendarGUITestAll.py, with each class in the file reperesenting a method under test.
+
 #**Strategies for Viewing a List Of Events**
 
-This functionality is done using the **reload_event_list** method.
+This functionality is done using the **reload_event_list** method.-
 
 Since the method relies heavily on user input, we use **path coverage** to test this function to cover all possible paths of user input given by the user.
 
